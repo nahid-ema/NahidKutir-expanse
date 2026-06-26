@@ -3,427 +3,226 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>নাহিদ কুটির প্রো (Eco-Luxury Sync)</title>
-    
+    <title>নাহিদ কুটির — খরচ ও দোকান বাকি</title>
+
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
     <style>
-        /* --- THEME BLUEPRINT (CSS VARIABLES) --- */
+        /* --- CSS VARIABLES --- */
         :root {
-            --ios-bg: #faf9f5;          /* Cream White */
-            --ios-card: #ffffff;        /* Crisp white for elevated elements */
-            --ios-input: #eef6eb;       /* Mint Background */
-            --text-main: #1e2b22;       /* Deep Organic Charcoal */
-            --text-muted: #526658;      /* Sage-Gray Muted Text */
-            --accent-blue: #37713d;     /* Primary Green */
-            --ios-green: #37713d;       /* Primary Green */
-            --ios-orange: #b2ce9f;      /* Sage Green */
-            --ios-red: #d32f2f;         /* Premium Luxury Crimson */
-            --card-border: rgba(55, 113, 61, 0.08);
-            
-            /* Pill Border Radii */
-            --pill-lg: 32px;
-            --pill-md: 20px;
-            --pill-btn: 50px;           /* Full capsule pill radius */
+            --bg:          #faf9f5;
+            --card:        #ffffff;
+            --input:       #eef6eb;
+            --text:        #1e2b22;
+            --muted:       #526658;
+            --green:       #37713d;
+            --sage:        #b2ce9f;
+            --red:         #d32f2f;
+            --border:      rgba(55,113,61,0.08);
+            --pill-lg:     32px;
+            --pill-md:     20px;
+            --pill-btn:    50px;
         }
-        
-        body.dark-theme {
-            --ios-bg: #111a14;          /* Midnight Forest Black */
-            --ios-card: #19241d;        /* Deep Luxury Emerald Card */
-            --ios-input: #223127;       /* Dark Mint Input */
-            --text-main: #faf9f5;       /* Cream White Text */
-            --text-muted: #8ca394;      /* Soft Mint Muted Text */
-            --accent-blue: #b2ce9f;     /* Sage Green as Accent in Dark Theme */
-            --ios-green: #4caf50;
-            --ios-orange: #37713d;
-            --ios-red: #ff5252;
-            --card-border: rgba(255, 255, 255, 0.06);
+        body.dark {
+            --bg:    #111a14;
+            --card:  #19241d;
+            --input: #223127;
+            --text:  #faf9f5;
+            --muted: #8ca394;
+            --green: #4caf50;
+            --sage:  #37713d;
+            --red:   #ff5252;
+            --border:rgba(255,255,255,0.06);
         }
 
-        * { 
-            box-sizing: border-box; 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-            -webkit-tap-highlight-color: transparent;
+        * { box-sizing:border-box; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif; -webkit-tap-highlight-color:transparent; }
+
+        body { background:var(--bg); color:var(--text); margin:0; padding:16px 12px; transition:background .3s,color .3s; }
+
+        /* ── MAIN CONTAINER ── */
+        .main { max-width:1400px; margin:0 auto; display:none; }
+
+        /* ── HEADER ── */
+        .header {
+            display:flex; justify-content:space-between; align-items:center;
+            flex-wrap:wrap; gap:12px; margin-bottom:22px;
         }
-        
-        body { 
-            background-color: var(--ios-bg); 
-            color: var(--text-main); 
-            margin: 0; 
-            padding: 16px 12px; 
-            transition: background 0.3s, color 0.3s; 
+        .header h1 { margin:0; font-size:22px; font-weight:800; color:var(--green); }
+        .header-btns { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+
+        /* ── SUMMARY CARDS ── */
+        .summary {
+            display:grid; grid-template-columns:repeat(2,1fr);
+            gap:12px; margin-bottom:24px;
         }
-        
-        .container { 
-            max-width: 1400px; 
-            margin: 0 auto; 
-            display: none; 
+        .sum-card {
+            background:var(--card); border:1px solid var(--border);
+            border-radius:var(--pill-md); padding:16px 12px; text-align:center;
+            transition:transform .2s;
         }
-        
-        /* Auth Screen Style */
-        .auth-container { 
-            max-width: 420px; 
-            margin: clamp(30px, 8vh, 100px) auto; 
-            padding: 30px 24px; 
-            background: var(--ios-card); 
-            border: 1px solid var(--card-border); 
-            border-radius: var(--pill-lg); 
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(55, 113, 61, 0.04);
+        .sum-card:hover { transform:translateY(-2px); }
+        .sum-card h4 { margin:0 0 6px; font-size:11px; text-transform:uppercase; letter-spacing:.5px; font-weight:700; }
+        .sum-card p  { margin:0; font-size:16px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+        /* ── FILTER BAR ── */
+        .filter-bar {
+            display:flex; flex-wrap:wrap; gap:10px; margin-bottom:24px;
+            background:var(--sage); padding:10px 14px;
+            border-radius:var(--pill-btn); box-shadow:0 6px 20px rgba(55,113,61,.15);
+            width:fit-content; max-width:100%;
         }
-        .auth-container h2 { 
-            margin-top: 0; 
-            margin-bottom: 25px; 
-            font-weight: 800;
-            color: var(--accent-blue);
+        .filter-bar select {
+            margin-bottom:0; padding:8px 36px 8px 16px; font-size:14px;
+            background:var(--card); border:none; border-radius:var(--pill-btn);
+            cursor:pointer; width:auto; min-width:120px;
+            color:var(--text);
+            appearance:none; -webkit-appearance:none;
+            background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23526658' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat:no-repeat; background-position:right 12px center;
         }
 
-        .header-section { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 25px; 
-            flex-wrap: wrap; 
-            gap: 12px; 
+        /* ── TWO-COL LAYOUT ── */
+        .cols { display:grid; grid-template-columns:1fr; gap:24px; margin-bottom:24px; }
+
+        /* ── CARD BOX ── */
+        .card-box {
+            background:var(--card); border:1px solid var(--border);
+            padding:20px 16px; border-radius:var(--pill-lg);
+            box-shadow:0 4px 20px rgba(55,113,61,.02);
         }
-        .header-section h1 { 
-            margin: 0; 
-            font-size: 22px; 
-            font-weight: 800;
-            color: var(--accent-blue);
-        }
-        .header-buttons { 
-            display: flex; 
-            gap: 8px; 
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        
-        .section-split { 
-            display: grid; 
-            grid-template-columns: 1fr; 
-            gap: 24px; 
-            margin-bottom: 25px; 
-        }
-        
-        .dash-grid { 
-            display: grid; 
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 12px; 
-            margin-bottom: 25px; 
-        }
-        .dash-card { 
-            background: var(--ios-card); 
-            padding: 16px 12px; 
-            border-radius: var(--pill-md); 
-            text-align: center; 
-            border: 1px solid var(--card-border);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.01);
-            transition: transform 0.2s;
-        }
-        .dash-card:hover {
-            transform: translateY(-2px);
-        }
-        .dash-card h4 { 
-            margin: 0 0 6px 0; 
-            font-size: 11px; 
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 700;
-        }
-        .dash-card p { 
-            margin: 0; 
-            font-size: 16px; 
-            font-weight: 800; 
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-        }
-        
-        .ios-card-box { 
-            background: var(--ios-card); 
-            border: 1px solid var(--card-border); 
-            padding: 20px 16px; 
-            border-radius: var(--pill-lg); 
-            box-shadow: 0 4px 20px rgba(55, 113, 61, 0.02);
-        }
-        .ios-card-box h3 { 
-            margin-top: 0; 
-            margin-bottom: 20px; 
-            font-size: 17px; 
-            font-weight: 700;
-            color: var(--accent-blue);
-            border-bottom: 2px solid var(--ios-input);
-            padding-bottom: 8px;
-        }
-        
-        .ios-btn { 
-            color: #fff; 
-            border: none; 
-            border-radius: var(--pill-btn); 
-            padding: 12px 20px; 
-            width: 100%; 
-            font-weight: 700; 
-            cursor: pointer; 
-            margin-top: 5px; 
-            transition: all 0.2s ease; 
-            font-size: 13px; 
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            touch-action: manipulation;
-        }
-        .ios-btn:hover { 
-            opacity: 0.9;
-            transform: translateY(-1px);
-        }
-        .ios-btn:active { 
-            opacity: 0.75; 
-            transform: translateY(0);
-        }
-        .cancel-btn { 
-            background: var(--text-muted) !important; 
-            color: #fff; 
-            margin-top: 5px; 
-            display: none; 
-        }
-        
-        /* FIX: removed duplicate -webkit-appearance:none; added custom select arrow; fixed dark theme text */
-        input, select { 
-            background: var(--ios-input); 
-            border: 2px solid transparent; 
-            padding: 12px 18px; 
-            border-radius: var(--pill-btn); 
-            width: 100%; 
-            margin-bottom: 12px; 
-            color: var(--text-main); 
-            font-size: 14px; 
-            font-weight: 500;
-            transition: all 0.2s ease;
-            appearance: none;
-            -webkit-appearance: none;
-        }
-        select {
-            padding-right: 36px;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23526658' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 14px center;
-        }
-        input:focus, select:focus { 
-            outline: none; 
-            border-color: var(--accent-blue);
-            background-color: var(--ios-card);
-            background-image: none;
-        }
-        select:focus {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2337713d' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-        }
-        /* FIX: dark theme inputs need explicit color so text isn't invisible */
-        body.dark-theme input, body.dark-theme select {
-            color: var(--text-main);
-            color-scheme: dark;
-        }
-        
-        .table-responsive { 
-            overflow-x: auto; 
-            margin-top: 15px; 
-            background: var(--ios-input); 
-            border-radius: var(--pill-md); 
-            padding: 8px;
-            -webkit-overflow-scrolling: touch; 
-        }
-        table { 
-            width: 100%; 
-            border-collapse: separate; 
-            border-spacing: 0 6px;
-            min-width: 520px; /* FIX: reduced from 650px for better mobile fit */
-        }
-        th { 
-            text-align: left; 
-            padding: 8px 12px; 
-            font-size: 11px; 
-            font-weight: 700;
-            color: var(--text-muted); 
-            text-transform: uppercase; 
-            white-space: nowrap; 
-            letter-spacing: 0.5px;
-        }
-        td { 
-            padding: 11px 12px; 
-            background: var(--ios-card);
-            border-top: 1px solid var(--card-border);
-            border-bottom: 1px solid var(--card-border);
-            font-size: 13px; 
-            font-weight: 500;
-            vertical-align: middle;
-            /* FIX: removed white-space: nowrap — was breaking Bengali text on mobile */
-            white-space: normal;
-            word-break: break-word;
-        }
-        td:first-child {
-            border-left: 1px solid var(--card-border);
-            border-top-left-radius: 12px;
-            border-bottom-left-radius: 12px;
-        }
-        td:last-child {
-            border-right: 1px solid var(--card-border);
-            border-top-right-radius: 12px;
-            border-bottom-right-radius: 12px;
-        }
-        /* Keep date/amount columns from wrapping */
-        td:first-child, td:nth-child(3), td:nth-child(4) {
-            white-space: nowrap;
-        }
-        
-        /* FIX: filter-container was inline-flex causing overflow on mobile */
-        .filter-container { 
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px; 
-            margin-bottom: 25px; 
-            background: #b2ce9f; /* Sage Green */
-            padding: 10px 14px;
-            border-radius: var(--pill-btn);
-            box-shadow: 0 6px 20px rgba(55, 113, 61, 0.15);
-            width: fit-content;
-            max-width: 100%;
-        }
-        .filter-container select { 
-            margin-bottom: 0; 
-            padding: 8px 36px 8px 16px; 
-            font-size: 14px; 
-            background-color: var(--ios-card);
-            border: none;
-            border-radius: var(--pill-btn);
-            cursor: pointer;
-            width: auto;
-            min-width: 120px;
-        }
-        
-        .action-btn { 
-            border: none; 
-            background: none; 
-            font-size: 16px; 
-            cursor: pointer; 
-            padding: 6px; 
-            transition: transform 0.1s ease;
-            touch-action: manipulation;
-        }
-        .action-btn:hover {
-            transform: scale(1.2);
-        }
-        
-        /* FIX: removed duplicate border declaration */
-        .lang-btn { 
-            background: var(--ios-card); 
-            border: 1px solid var(--card-border);
-            border-radius: var(--pill-btn); 
-            padding: 8px 14px; 
-            cursor: pointer; 
-            font-size: 12px; 
-            font-weight: 700; 
-            color: var(--text-main); 
-            transition: all 0.2s;
-            touch-action: manipulation;
-            white-space: nowrap;
-        }
-        .lang-btn.active { 
-            background: var(--accent-blue); 
-            color: white; 
-            border-color: var(--accent-blue);
+        .card-box h3 {
+            margin:0 0 18px; font-size:17px; font-weight:700; color:var(--green);
+            border-bottom:2px solid var(--input); padding-bottom:8px;
         }
 
-        /* FIX: theme button as a proper class instead of inline style */
+        /* ── INPUTS ── */
+        input, select {
+            background:var(--input); border:2px solid transparent;
+            padding:12px 18px; border-radius:var(--pill-btn);
+            width:100%; margin-bottom:12px; color:var(--text);
+            font-size:14px; font-weight:500; transition:all .2s;
+            appearance:none; -webkit-appearance:none;
+        }
+        select { padding-right:36px;
+            background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23526658' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat:no-repeat; background-position:right 14px center;
+        }
+        input:focus, select:focus { outline:none; border-color:var(--green); background-color:var(--card); }
+        body.dark input, body.dark select { color:var(--text); color-scheme:dark; }
+
+        /* ── BUTTONS ── */
+        .btn {
+            color:#fff; border:none; border-radius:var(--pill-btn);
+            padding:12px 20px; width:100%; font-weight:700; cursor:pointer;
+            margin-top:5px; transition:all .2s; font-size:13px;
+            text-transform:uppercase; letter-spacing:.3px; touch-action:manipulation;
+        }
+        .btn:hover { opacity:.9; transform:translateY(-1px); }
+        .btn:active { opacity:.75; transform:translateY(0); }
+        .btn-cancel { background:var(--muted)!important; display:none; }
+
+        .pill-btn {
+            background:var(--card); border:1px solid var(--border);
+            border-radius:var(--pill-btn); padding:8px 14px; cursor:pointer;
+            font-size:12px; font-weight:700; color:var(--text);
+            transition:all .2s; touch-action:manipulation; white-space:nowrap;
+        }
+        .pill-btn.active { background:var(--green); color:#fff; border-color:var(--green); }
         .theme-btn {
-            border: 1px solid var(--card-border);
-            background: var(--ios-card);
-            border-radius: var(--pill-btn);
-            padding: 8px 14px;
-            cursor: pointer;
-            font-size: 16px;
-            touch-action: manipulation;
-            transition: all 0.2s;
-        }
-        
-        /* === TABLET / PC RESPONSIVE (768px+) === */
-        @media (min-width: 768px) {
-            body { padding: 28px 24px; }
-            .header-section h1 { font-size: 28px; }
-            .dash-grid { grid-template-columns: repeat(4, 1fr); gap: 16px; }
-            .dash-card { padding: 18px 14px; }
-            .dash-card h4 { font-size: 13px; }
-            .dash-card p { font-size: 20px; }
-            .ios-card-box { padding: 28px; }
-            .ios-card-box h3 { font-size: 19px; }
-            .lang-btn { font-size: 13px; padding: 8px 16px; }
-            
-            #roomForm { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 12px !important; }
-            #roomForm input { margin-bottom: 0; }
-            #roomForm .form-actions { grid-column: span 3 !important; display: flex; gap: 12px; }
-
-            #tenantForm { display: grid !important; grid-template-columns: repeat(4, 1fr) !important; gap: 12px !important; }
-            #tenantForm input { margin-bottom: 0; }
-            #tenantForm .form-actions { grid-column: span 4 !important; display: flex; gap: 12px; }
-            
-            #rentForm { display: grid !important; grid-template-columns: repeat(4, 1fr) !important; gap: 12px !important; }
-            #rentForm input, #rentForm select { margin-bottom: 0; }
-            #rentForm .form-actions { grid-column: span 4 !important; margin-top: 5px; display: flex; gap: 12px; }
-            
-            #expForm { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 12px !important; }
-            #expForm input { margin-bottom: 0; }
-            #expForm .form-actions { grid-column: span 3 !important; margin-top: 5px; display: flex; gap: 12px; }
-
-            #dokanForm { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 12px !important; }
-            #dokanForm input { margin-bottom: 0; }
-            #dokanForm .form-actions { grid-column: span 3 !important; margin-top: 5px; display: flex; gap: 12px; }
-
-            table { min-width: 600px; }
-            th { padding: 10px 14px; font-size: 12px; }
-            td { padding: 12px 14px; font-size: 13.5px; }
+            border:1px solid var(--border); background:var(--card);
+            border-radius:var(--pill-btn); padding:8px 14px;
+            cursor:pointer; font-size:16px; touch-action:manipulation; transition:all .2s;
         }
 
-        /* === DESKTOP (1024px+) === */
-        @media (min-width: 1024px) {
-            body { padding: 30px 32px; }
-            .header-section h1 { font-size: 32px; }
-            .section-split { grid-template-columns: repeat(2, 1fr); gap: 24px; }
-            .ios-btn { font-size: 14px; }
+        /* ── TABLE ── */
+        .tbl-wrap {
+            overflow-x:auto; margin-top:14px; background:var(--input);
+            border-radius:var(--pill-md); padding:8px;
+            -webkit-overflow-scrolling:touch;
         }
-        
-        @media print { 
-            .no-print { display: none !important; } 
-            body { background: white; color: black; }
-            .ios-card-box { border: none; padding: 0; margin-bottom: 30px; }
+        table { width:100%; border-collapse:separate; border-spacing:0 6px; min-width:420px; }
+        th {
+            text-align:left; padding:8px 12px; font-size:11px; font-weight:700;
+            color:var(--muted); text-transform:uppercase; white-space:nowrap; letter-spacing:.5px;
+        }
+        td {
+            padding:11px 12px; background:var(--card);
+            border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+            font-size:13px; font-weight:500; vertical-align:middle;
+            white-space:normal; word-break:break-word;
+        }
+        td:first-child { border-left:1px solid var(--border); border-top-left-radius:12px; border-bottom-left-radius:12px; white-space:nowrap; }
+        td:last-child  { border-right:1px solid var(--border); border-top-right-radius:12px; border-bottom-right-radius:12px; }
+        td:nth-child(3) { white-space:nowrap; }
+
+        .act-btn { border:none; background:none; font-size:16px; cursor:pointer; padding:6px; transition:transform .1s; touch-action:manipulation; }
+        .act-btn:hover { transform:scale(1.2); }
+
+        /* ── PRINT ── */
+        .print-wrap { text-align:center; margin:28px 0 48px; }
+        @media print {
+            .no-print { display:none!important; }
+            body { background:#fff; color:#000; }
+            .card-box { border:none; padding:0; margin-bottom:28px; }
+        }
+
+        /* ── TABLET (768px+) ── */
+        @media(min-width:768px) {
+            body { padding:28px 24px; }
+            .header h1 { font-size:28px; }
+            .summary { grid-template-columns:repeat(4,1fr); gap:16px; }
+            .sum-card { padding:18px 14px; }
+            .sum-card h4 { font-size:13px; }
+            .sum-card p  { font-size:20px; }
+            .card-box { padding:28px; }
+            .card-box h3 { font-size:19px; }
+            .pill-btn { font-size:13px; padding:8px 16px; }
+            table { min-width:480px; }
+            th { padding:10px 14px; font-size:12px; }
+            td { padding:12px 14px; font-size:13.5px; }
+
+            #expForm  { display:grid!important; grid-template-columns:repeat(3,1fr)!important; gap:12px!important; }
+            #expForm input { margin-bottom:0; }
+            #expForm .form-actions { grid-column:span 3!important; display:flex; gap:12px; margin-top:4px; }
+
+            #dokanForm { display:grid!important; grid-template-columns:repeat(3,1fr)!important; gap:12px!important; }
+            #dokanForm input { margin-bottom:0; }
+            #dokanForm .form-actions { grid-column:span 3!important; display:flex; gap:12px; margin-top:4px; }
+        }
+
+        /* ── DESKTOP (1024px+) ── */
+        @media(min-width:1024px) {
+            body { padding:30px 32px; }
+            .header h1 { font-size:32px; }
+            .cols { grid-template-columns:repeat(2,1fr); }
+            .btn { font-size:14px; }
         }
     </style>
 </head>
 <body>
 
-<div id="authPanel" class="auth-container">
-    <h2 id="loginTitle">নাহিদ কুটির প্রো লগইন 🔐</h2>
-    <input type="email" id="authEmail" placeholder="ইমেইল অ্যাড্রেস">
-    <input type="password" id="authPassword" placeholder="পাসওয়ার্ড">
-    <button onclick="handleLogin()" class="ios-btn" style="background:var(--accent-blue)">লগইন করুন</button>
-</div>
+<!-- ══ MAIN APP ══ -->
+<div class="main" id="mainContainer" style="display:block;">
 
-<div class="container" id="mainContainer">
-    <div class="header-section">
-        <h1 id="mainTitle">নাহিদ কুটির 🏠</h1>
-        <div class="header-buttons no-print">
-            <button onclick="triggerBackup()" id="backupBtn" class="lang-btn" style="background:var(--ios-orange); color:var(--text-main);">📥 ব্যাকআপ</button>
-            <button onclick="document.getElementById('backupInput').click()" id="restoreBtn" class="lang-btn" style="background:var(--accent-blue); color:white;">📤 রিস্টোর</button>
-            <input type="file" id="backupInput" style="display:none;" accept=".json" onchange="handleRestore(event)">
-            
-            <button onclick="toggleLanguage()" id="langBtn" class="lang-btn active">EN</button>
+    <!-- Header -->
+    <div class="header">
+        <h1 id="mainTitle">নাহিদ কুটির 💰</h1>
+        <div class="header-btns no-print">
+            <button onclick="triggerBackup()"                                    id="backupBtn"  class="pill-btn" style="background:var(--sage);color:var(--text);">📥 ব্যাকআপ</button>
+            <button onclick="document.getElementById('restoreInput').click()"    id="restoreBtn" class="pill-btn" style="background:var(--green);color:#fff;">📤 রিস্টোর</button>
+            <input type="file" id="restoreInput" style="display:none;" accept=".json" onchange="handleRestore(event)">
+            <button onclick="toggleLang()"  id="langBtn"  class="pill-btn active">EN</button>
             <button onclick="toggleTheme()" id="themeBtn" class="theme-btn">☀️</button>
-            <button onclick="handleLogout()" id="logoutBtn" class="lang-btn" style="background:var(--ios-red); color:white;">✕</button>
+
         </div>
     </div>
 
-    <div class="filter-container no-print">
+    <!-- Filter Bar -->
+    <div class="filter-bar no-print">
         <select id="yearFilter" onchange="renderApp()" style="font-weight:bold;">
             <option value="all" id="yearAllOpt">সব বছর</option>
+            <option value="2024">2024</option>
             <option value="2025">2025</option>
             <option value="2026">2026</option>
             <option value="2027">2027</option>
@@ -434,172 +233,81 @@
         </select>
     </div>
 
-    <div class="dash-grid">
-        <div class="dash-card"><h4 style="color:var(--accent-blue);" id="rentLabel">মোট ভাড়া</h4><p id="d-rent">৳ 0</p></div>
-        <div class="dash-card"><h4 style="color:var(--ios-green);" id="incomeLabel">মোট আদায়</h4><p id="d-income">৳ 0</p></div>
-        <div class="dash-card"><h4 style="color:var(--ios-red);" id="dueLabel">মোট বকেয়া</h4><p id="d-due">৳ 0</p></div>
-        <div class="dash-card"><h4 style="color:var(--text-muted);" id="expenseLabel">মোট খরচ</h4><p id="d-expense">৳ 0</p></div>
+    <!-- Summary Cards -->
+    <div class="summary">
+        <div class="sum-card"><h4 style="color:var(--red);"  id="lbTotalExp">মোট খরচ</h4><p id="d-expense">৳ 0</p></div>
+        <div class="sum-card"><h4 style="color:var(--red);"  id="lbTotalDok">মোট দোকান বাকি</h4><p id="d-dokan">৳ 0</p></div>
+        <div class="sum-card"><h4 style="color:var(--green);" id="lbExpCount">খরচের এন্ট্রি</h4><p id="d-expcount">0</p></div>
+        <div class="sum-card"><h4 style="color:var(--muted);" id="lbDokCount">বাকির এন্ট্রি</h4><p id="d-dokcount">0</p></div>
     </div>
 
-    <div class="section-split">
-        <div class="ios-card-box">
-            <h3 id="roomTitle">✦ রুমের তথ্য</h3>
-            <form id="roomForm" class="no-print">
-                <input type="text" id="rNo" placeholder="রুম নম্বর" required>
-                <input type="number" id="rRent" placeholder="ভাড়া (টাকা)" required>
-                <input type="number" id="rGas" placeholder="গ্যাস বিল (টাকা)">
-                <input type="number" id="rWater" placeholder="পানির বিল (টাকা)">
-                <input type="number" id="rWaste" placeholder="ময়লার বিল (টাকা)">
-                <input type="text" id="rMeter" placeholder="মিটার নম্বর">
-                <div class="form-actions">
-                    <button type="submit" id="roomSubmitBtn" class="ios-btn" style="background:var(--accent-blue)">রুম যুক্ত করুন</button>
-                    <button type="button" id="roomCancelBtn" class="ios-btn cancel-btn" onclick="resetEditState()">বাতিল</button>
-                </div>
-            </form>
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th id="thRoomNo">রুম নং</th>
-                            <th id="thRentAmt">ভাড়া</th>
-                            <th id="thGasBill">গ্যাস বিল</th>
-                            <th id="thWaterBill">পানির বিল</th>
-                            <th id="thWasteBill">ময়লার বিল</th>
-                            <th id="thMeterNo">মিটার নং</th>
-                            <th class="no-print" id="thRoomAction">অ্যাকশন</th>
-                        </tr>
-                    </thead>
-                    <tbody id="roomBody"></tbody>
-                </table>
-            </div>
-        </div>
+    <!-- Two columns: Expense + Dokan -->
+    <div class="cols">
 
-        <div class="ios-card-box">
-            <h3 id="tenantTitle">✦ ভাড়াটিয়া তথ্য</h3>
-            <form id="tenantForm" class="no-print">
-                <input type="text" id="tName" placeholder="নাম" required>
-                <input type="text" id="tPhone" placeholder="ফোন" required>
-                <input type="text" id="tRoom" placeholder="রুম নং" required>
-                <input type="text" id="tNid" placeholder="NID নম্বর">
-                <div class="form-actions">
-                    <button type="submit" id="tenantSubmitBtn" class="ios-btn" style="background:var(--ios-green)">ভাড়াটিয়া যুক্ত করুন</button>
-                    <button type="button" id="tenantCancelBtn" class="ios-btn cancel-btn" onclick="resetEditState()">বাতিল</button>
-                </div>
-            </form>
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th id="thName">নাম</th>
-                            <th id="thPhone">ফোন</th>
-                            <th id="thRoom">রুম</th>
-                            <th id="thNid">NID</th>
-                            <th class="no-print" id="thAction">অ্যাকশন</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tenantBody"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <div class="section-split">
-        <div class="ios-card-box">
-            <h3 id="rentTitle">✦ ভাড়া আদায়</h3>
-            <form id="rentForm" class="no-print">
-                <input type="date" id="rentDate" required>
-                <select id="tenantSelect" onchange="fillTenantDetails()" required>
-                    <option value="">ভাড়াটিয়া সিলেক্ট করুন</option>
-                </select>
-                <input type="text" id="dispRoom" placeholder="রুম নম্বর" readonly style="opacity:0.7;">
-                <input type="text" id="dispPhone" placeholder="ফোন নম্বর" readonly style="opacity:0.7;">
-                <input type="number" id="rent" placeholder="ভাড়া (টাকা)" required oninput="calcDue()">
-                <input type="number" id="paid" placeholder="জমা (টাকা)" required oninput="calcDue()">
-                <input type="number" id="due" readonly style="font-weight:bold;">
-                <div class="form-actions">
-                    <button type="submit" id="rentSubmitBtn" class="ios-btn" style="background:var(--accent-blue)">ভাড়া যোগ করুন</button>
-                    <button type="button" id="rentCancelBtn" class="ios-btn cancel-btn" onclick="resetEditState()">বাতিল</button>
-                </div>
-            </form>
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th id="thRentDate">তারিখ</th>
-                            <th id="thRentName">নাম (রুম)</th>
-                            <th id="thRentAmount">ভাড়া</th>
-                            <th id="thPaidAmount">জমা</th>
-                            <th id="thDueStatus">বকেয়া অবস্থা</th>
-                            <th class="no-print" id="thRentAction">অ্যাকশন</th>
-                        </tr>
-                    </thead>
-                    <tbody id="rentBody"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="ios-card-box">
+        <!-- ── EXPENSE TRACKER ── -->
+        <div class="card-box">
             <h3 id="expenseTitle">✦ খরচ ট্র্যাকার</h3>
             <form id="expForm" class="no-print">
-                <input type="date" id="expDate" required>
-                <input type="text" id="expDesc" placeholder="খরচের বিবরণ" required>
-                <input type="number" id="expAmount" placeholder="পরিমাণ (টাকা)" required>
+                <input type="date"   id="expDate"   required>
+                <input type="text"   id="expDesc"   placeholder="খরচের বিবরণ" required>
+                <input type="number" id="expAmount" placeholder="পরিমাণ (টাকা)" required min="0">
                 <div class="form-actions">
-                    <button type="submit" id="expSubmitBtn" class="ios-btn" style="background:var(--accent-blue)">খরচ যোগ করুন</button>
-                    <button type="button" id="expCancelBtn" class="ios-btn cancel-btn" onclick="resetEditState()">বাতিল</button>
+                    <button type="submit" id="expSubmitBtn" class="btn" style="background:var(--green)">খরচ যোগ করুন</button>
+                    <button type="button" id="expCancelBtn" class="btn btn-cancel" onclick="resetEdit()">বাতিল</button>
                 </div>
             </form>
-            <div class="table-responsive">
+            <div class="tbl-wrap">
                 <table>
-                    <thead>
-                        <tr>
-                            <th id="thExpDate">তারিখ</th>
-                            <th id="thExpDesc">বিবরণ</th>
-                            <th id="thExpAmount">টাকা</th>
-                            <th class="no-print" id="thExpAction">অ্যাকশন</th>
-                        </tr>
-                    </thead>
+                    <thead><tr>
+                        <th id="thExpDate">তারিখ</th>
+                        <th id="thExpDesc">বিবরণ</th>
+                        <th id="thExpAmt">টাকা</th>
+                        <th class="no-print" id="thExpAct">অ্যাকশন</th>
+                    </tr></thead>
                     <tbody id="expBody"></tbody>
                 </table>
             </div>
         </div>
-    </div>
 
-    <div class="section-split">
-        <div class="ios-card-box">
-            <h3 id="dokanBakiTitle">✦ দোকান বাকি</h3>
+        <!-- ── SHOP DUES ── -->
+        <div class="card-box">
+            <h3 id="dokanTitle">✦ দোকান বাকি</h3>
             <form id="dokanForm" class="no-print">
-                <input type="date" id="dokanDate" required>
-                <input type="text" id="dokanDesc" placeholder="বিবরণ" required>
-                <input type="number" id="dokanAmount" placeholder="টাকা" required>
+                <input type="date"   id="dokanDate"   required>
+                <input type="text"   id="dokanDesc"   placeholder="বিবরণ" required>
+                <input type="number" id="dokanAmount" placeholder="টাকা" required min="0">
                 <div class="form-actions">
-                    <button type="submit" id="dokanSubmitBtn" class="ios-btn" style="background:var(--ios-red)">বাকি যোগ করুন</button>
-                    <button type="button" id="dokanCancelBtn" class="ios-btn cancel-btn" onclick="resetEditState()">বাতিল</button>
+                    <button type="submit" id="dokanSubmitBtn" class="btn" style="background:var(--red)">বাকি যোগ করুন</button>
+                    <button type="button" id="dokanCancelBtn" class="btn btn-cancel" onclick="resetEdit()">বাতিল</button>
                 </div>
             </form>
-            <div class="table-responsive">
+            <div class="tbl-wrap">
                 <table>
-                    <thead>
-                        <tr>
-                            <th id="thDokanDate">তারিখ</th>
-                            <th id="thDokanDesc">বিবরণ</th>
-                            <th id="thDokanAmount">টাকা</th>
-                            <th class="no-print" id="thDokanAction">অ্যাকশন</th>
-                        </tr>
-                    </thead>
+                    <thead><tr>
+                        <th id="thDokDate">তারিখ</th>
+                        <th id="thDokDesc">বিবরণ</th>
+                        <th id="thDokAmt">টাকা</th>
+                        <th class="no-print" id="thDokAct">অ্যাকশন</th>
+                    </tr></thead>
                     <tbody id="dokanBody"></tbody>
                 </table>
             </div>
         </div>
+
+    </div><!-- /cols -->
+
+    <!-- Print Button -->
+    <div class="print-wrap no-print">
+        <button onclick="window.print()" class="btn" id="printBtn"
+            style="background:var(--green);width:auto;padding:14px 40px;border-radius:var(--pill-md);font-size:15px;">
+            📄 PDF রিপোর্ট প্রিন্ট করুন
+        </button>
     </div>
 
-    <div class="no-print" style="text-align:center; margin-top: 30px; margin-bottom:50px;">
-        <button onclick="window.print()" class="ios-btn" style="background:var(--ios-green); width:auto; padding: 15px 40px; border-radius:var(--pill-md); font-size:16px;" id="printBtn">📄 PDF রিপোর্ট প্রিন্ট করুন</button>
-    </div>
-</div>
+</div><!-- /main -->
 
 <script>
-    // --- FIREBASE CONFIGURATION ---
+    // ══ FIREBASE CONFIG ══
     const firebaseConfig = {
     apiKey: "AIzaSyCq3vp6EDR_tE8IT1gyrqJZwNSvfYa8QbM",
     authDomain: "nahidkutir-expanse.firebaseapp.com",
@@ -608,888 +316,1113 @@
     messagingSenderId: "49908192819",
     appId: "1:49908192819:web:3314f43ad76ee8e3f87546",
     measurementId: "G-JZ7WSDMQ6Z"
-  }; 
+  };
 
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const auth = firebase.auth();
+    const db   = firebase.firestore();
 
-    // Enable offline persistence (compat SDK default; no need for manual settings call)
-    db.enablePersistence({ synchronizeTabs: true }).catch(err => {
-        if (err.code === 'failed-precondition') {
-            console.warn('Firestore persistence unavailable: multiple tabs open.');
-        } else if (err.code === 'unimplemented') {
-            console.warn('Firestore persistence not supported in this browser.');
-        }
-    });
+    try {
+        db.settings({
+            cache: {
+                kind: 'persistent',
+                tabManager: firebase.firestore.PersistentMultipleTabManager()
+            }
+        });
+    } catch(e) { console.warn('Firestore cache:', e.message); }
 
-    auth.onAuthStateChanged(user => {
-        if (user) {
-            document.getElementById('authPanel').style.display = 'none';
-            document.getElementById('mainContainer').style.display = 'block';
-            initApp();
-        } else {
-            document.getElementById('authPanel').style.display = 'block';
-            document.getElementById('mainContainer').style.display = 'none';
-        }
-    });
+    // ══ No login required — app starts directly ══
+    document.getElementById('mainContainer').style.display = 'block';
+    initApp();
 
-    function handleLogin() {
-        const email = document.getElementById('authEmail').value.trim();
-        const password = document.getElementById('authPassword').value;
-        if(!email || !password) return alert("সব ঘর পূরণ করুন!");
-        auth.signInWithEmailAndPassword(email, password).catch(err => alert("লগইন ব্যর্থ: " + err.message));
-    }
-
-    function handleLogout() {
-        if(confirm("লগআউট করতে চান?")) auth.signOut();
-    }
-
-    // --- TRANSLATIONS SYSTEM ---
-    const translations = {
+    // ══ TRANSLATIONS ══
+    const TR = {
         bn: {
-            mainTitle: "নাহিদ কুটির 🏠",
-            yearAllOpt: "সব বছর",
-            rentLabel: "মোট ভাড়া",
-            incomeLabel: "মোট আদায়",
-            dueLabel: "মোট বকেয়া",
-            expenseLabel: "মোট খরচ",
-            roomTitle: "✦ রুমের তথ্য",
-            thRoomNo: "রুম নং",
-            thRentAmt: "ভাড়া",
-            thGasBill: "গ্যাস বিল",
-            thWaterBill: "পানির বিল",
-            thWasteBill: "ময়লার বিল",
-            thMeterNo: "মিটার নং",
-            thRoomAction: "অ্যাকশন",
-            roomSubmitBtn: "রুম যুক্ত করুন",
-            roomUpdateBtn: "রুম আপডেট করুন ⚙️",
-            tenantTitle: "✦ ভাড়াটিয়া তথ্য",
-            thName: "নাম",
-            thPhone: "ফোন",
-            thRoom: "রুম",
-            thNid: "NID",
-            thAction: "অ্যাকশন",
-            tNamePlaceholder: "নাম",
-            tPhonePlaceholder: "ফোন",
-            tRoomPlaceholder: "রুম নং",
-            tNidPlaceholder: "NID নম্বর",
-            tenantSubmitBtn: "ভাড়াটিয়া যুক্ত করুন",
-            tenantUpdateBtn: "ভাড়াটিয়া আপডেট করুন ⚙️",
-            rentTitle: "✦ ভাড়া আদায়",
-            rentSelectOpt: "ভাড়াটিয়া সিলেক্ট করুন",
-            dispRoomPlaceholder: "রুম নম্বর",
-            dispPhonePlaceholder: "ফোন নম্বর",
-            rentPlaceholder: "ভাড়া (টাকা)",
-            paidPlaceholder: "জমা (টাকা)",
-            duePlaceholder: "বকেয়া",
-            rentSubmitBtn: "ভাড়া যোগ করুন",
-            rentUpdateBtn: "ভাড়ার তথ্য আপডেট করুন ⚙️",
-            thRentDate: "তারিখ",
-            thRentName: "নাম (রুম)",
-            thRentAmount: "ভাড়া",
-            thPaidAmount: "জমা",
-            thDueStatus: "বকেয়া অবস্থা",
-            thRentAction: "অ্যাকশন",
-            expenseTitle: "✦ খরচ ট্র্যাকার",
-            expDescPlaceholder: "খরচের বিবরণ",
-            expAmountPlaceholder: "পরিমাণ (টাকা)",
-            expSubmitBtn: "খরচ যোগ করুন",
-            expUpdateBtn: "খরচের তথ্য আপডেট করুন ⚙️",
-            thExpDate: "তারিখ",
-            thExpDesc: "বিবরণ",
-            thExpAmount: "টাকা",
-            thExpAction: "অ্যাকশন",
-            dokanBakiTitle: "✦ দোকান বাকি",
-            thDokanDate: "তারিখ",
-            thDokanDesc: "বিবরণ",
-            thDokanAmount: "টাকা",
-            thDokanAction: "অ্যাকশন",
-            dokanSubmitBtn: "বাকি যোগ করুন",
-            dokanUpdateBtn: "বাকি আপডেট করুন ⚙️",
-            dokanDescPlaceholder: "বিবরণ",
-            dokanAmountPlaceholder: "টাকা",
-            printBtn: "📄 PDF রিপোর্ট প্রিন্ট করুন",
-            months: ["জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর"],
-            paidStatus: "✓ পরিশোধিত",
-            dueStatus: "⚠️",
-            dueSuffix: "বকেয়া",
-            deleteConfirm: "এটি ডিলিট করতে নিশ্চিত?",
-            currencySymbol: "৳ ",
-            roomText: "রুম",
-            totalText: "সর্বমোট তালিকা",
-            cancelBtn: "বাতিল"
+            mainTitle:       'নাহিদ কুটির 💰',
+            yearAllOpt:      'সব বছর',
+            lbTotalExp:      'মোট খরচ',
+            lbTotalDok:      'মোট দোকান বাকি',
+            lbExpCount:      'খরচের এন্ট্রি',
+            lbDokCount:      'বাকির এন্ট্রি',
+            expenseTitle:    '✦ খরচ ট্র্যাকার',
+            dokanTitle:      '✦ দোকান বাকি',
+            expDescPh:       'খরচের বিবরণ',
+            expAmtPh:        'পরিমাণ (টাকা)',
+            expSubmit:       'খরচ যোগ করুন',
+            expUpdate:       'খরচ আপডেট করুন ⚙️',
+            dokanDescPh:     'বিবরণ',
+            dokanAmtPh:      'টাকা',
+            dokanSubmit:     'বাকি যোগ করুন',
+            dokanUpdate:     'বাকি আপডেট করুন ⚙️',
+            thExpDate:       'তারিখ',
+            thExpDesc:       'বিবরণ',
+            thExpAmt:        'টাকা',
+            thExpAct:        'অ্যাকশন',
+            thDokDate:       'তারিখ',
+            thDokDesc:       'বিবরণ',
+            thDokAmt:        'টাকা',
+            thDokAct:        'অ্যাকশন',
+            printBtn:        '📄 PDF রিপোর্ট প্রিন্ট করুন',
+            cancelBtn:       'বাতিল',
+            backupBtn:       '📥 ব্যাকআপ',
+            restoreBtn:      '📤 রিস্টোর',
+            totalRow:        'সর্বমোট',
+            deleteConfirm:   'এটি ডিলিট করতে নিশ্চিত?',
+            currency:        '৳ ',
+            months: ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর']
         },
         en: {
-            mainTitle: "Nahid Kutir Pro 🏠",
-            yearAllOpt: "All Years",
-            rentLabel: "Total Expected",
-            incomeLabel: "Total Income",
-            dueLabel: "Total Due",
-            expenseLabel: "Total Expense",
-            roomTitle: "✦ Room Configuration",
-            thRoomNo: "Room No",
-            thRentAmt: "Rent",
-            thGasBill: "Gas",
-            thWaterBill: "Water",
-            thWasteBill: "Waste",
-            thMeterNo: "Meter No",
-            thRoomAction: "Action",
-            roomSubmitBtn: "Add Room",
-            roomUpdateBtn: "Update Room ⚙️",
-            tenantTitle: "✦ Tenant Profile",
-            thName: "Name",
-            thPhone: "Phone",
-            thRoom: "Room",
-            thNid: "NID",
-            thAction: "Action",
-            tNamePlaceholder: "Name",
-            tPhonePlaceholder: "Phone",
-            tRoomPlaceholder: "Room No",
-            tNidPlaceholder: "NID Number",
-            tenantSubmitBtn: "Add Tenant",
-            tenantUpdateBtn: "Update Tenant ⚙️",
-            rentTitle: "✦ Rent Collection",
-            rentSelectOpt: "Select Tenant",
-            dispRoomPlaceholder: "Room No",
-            dispPhonePlaceholder: "Phone",
-            rentPlaceholder: "Total Rent",
-            paidPlaceholder: "Paid Amount",
-            duePlaceholder: "Due Amount",
-            rentSubmitBtn: "Record Payment",
-            rentUpdateBtn: "Update Payment ⚙️",
-            thRentDate: "Date",
-            thRentName: "Name (Room)",
-            thRentAmount: "Rent",
-            thPaidAmount: "Paid",
-            thDueStatus: "Status",
-            thRentAction: "Action",
-            expenseTitle: "✦ Expense Log",
-            expDescPlaceholder: "Description",
-            expAmountPlaceholder: "Amount",
-            expSubmitBtn: "Log Expense",
-            expUpdateBtn: "Update Expense ⚙️",
-            thExpDate: "Date",
-            thExpDesc: "Description",
-            thExpAmount: "Amount",
-            thExpAction: "Action",
-            dokanBakiTitle: "✦ Shop Dues",
-            thDokanDate: "Date",
-            thDokanDesc: "Description",
-            thDokanAmount: "Amount",
-            thDokanAction: "Action",
-            dokanSubmitBtn: "Add Shop Due",
-            dokanUpdateBtn: "Update Shop Due ⚙️",
-            dokanDescPlaceholder: "Description",
-            dokanAmountPlaceholder: "Amount",
-            printBtn: "📄 Print PDF Report",
-            months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
-            paidStatus: "✓ Paid",
-            dueStatus: "⚠️",
-            dueSuffix: "Due",
-            deleteConfirm: "Delete this item?",
-            currencySymbol: "৳ ",
-            roomText: "Room",
-            totalText: "Total List",
-            cancelBtn: "Cancel"
+            mainTitle:       'Nahid Kutir 💰',
+            yearAllOpt:      'All Years',
+            lbTotalExp:      'Total Expense',
+            lbTotalDok:      'Total Shop Dues',
+            lbExpCount:      'Expense Entries',
+            lbDokCount:      'Due Entries',
+            expenseTitle:    '✦ Expense Tracker',
+            dokanTitle:      '✦ Shop Dues',
+            expDescPh:       'Description',
+            expAmtPh:        'Amount',
+            expSubmit:       'Log Expense',
+            expUpdate:       'Update Expense ⚙️',
+            dokanDescPh:     'Description',
+            dokanAmtPh:      'Amount',
+            dokanSubmit:     'Add Shop Due',
+            dokanUpdate:     'Update Shop Due ⚙️',
+            thExpDate:       'Date',
+            thExpDesc:       'Description',
+            thExpAmt:        'Amount',
+            thExpAct:        'Action',
+            thDokDate:       'Date',
+            thDokDesc:       'Description',
+            thDokAmt:        'Amount',
+            thDokAct:        'Action',
+            printBtn:        '📄 Print PDF Report',
+            cancelBtn:       'Cancel',
+            backupBtn:       '📥 Backup',
+            restoreBtn:      '📤 Restore',
+            totalRow:        'Grand Total',
+            deleteConfirm:   'Delete this item?',
+            currency:        '৳ ',
+            months: ['January','February','March','April','May','June','July','August','September','October','November','December']
         }
     };
 
-    let currentLang = localStorage.getItem('nk_lang') || 'bn';
-    let roomData = [];
-    let rentData = [];
-    let expData = [];
-    let tenantData = [];
-    let dokanData = [];
-    let editRoomId = null;
-    let editTenantId = null;
-    let editRentId = null;
+    let lang     = localStorage.getItem('nk_lang') || 'bn';
+    let expData  = [];
+    let dokData  = [];
     let editExpId = null;
-    let editDokanId = null;
+    let editDokId = null;
 
-    function escapeHTML(str) {
-        if (!str) return '';
-        return String(str)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
+    const t = k => TR[lang][k] || TR.bn[k];
+    const fc = amt => t('currency') + Number(amt).toLocaleString();
+    function esc(s) {
+        if (!s && s !== 0) return '';
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
     }
 
-    function t(key) {
-        return translations[currentLang][key] || translations['bn'][key];
+    // ══ LANGUAGE ══
+    function toggleLang() {
+        lang = lang === 'bn' ? 'en' : 'bn';
+        localStorage.setItem('nk_lang', lang);
+        document.documentElement.lang = lang;
+        updateText();
     }
 
-    function toggleLanguage() {
-        currentLang = currentLang === 'bn' ? 'en' : 'bn';
-        localStorage.setItem('nk_lang', currentLang);
-        document.documentElement.lang = currentLang;
-        updateAllText();
-    }
-
-    function updateAllText() {
-        document.getElementById('mainTitle').textContent = t('mainTitle');
-        document.getElementById('yearAllOpt').textContent = t('yearAllOpt');
-        document.getElementById('rentLabel').textContent = t('rentLabel');
-        document.getElementById('incomeLabel').textContent = t('incomeLabel');
-        document.getElementById('dueLabel').textContent = t('dueLabel');
-        document.getElementById('expenseLabel').textContent = t('expenseLabel');
-        document.getElementById('backupBtn').textContent = currentLang === 'bn' ? '📥 ব্যাকআপ' : '📥 Backup';
-        document.getElementById('restoreBtn').textContent = currentLang === 'bn' ? '📤 রিস্টোর' : '📤 Restore';
-        document.getElementById('roomTitle').textContent = t('roomTitle');
-        document.getElementById('rNo').placeholder = currentLang === 'bn' ? 'রুম নম্বর' : 'Room Number';
-        document.getElementById('rRent').placeholder = currentLang === 'bn' ? 'ভাড়া (টাকা)' : 'Rent (TK)';
-        document.getElementById('rGas').placeholder = currentLang === 'bn' ? 'গ্যাস বিল (টাকা)' : 'Gas Bill';
-        document.getElementById('rWater').placeholder = currentLang === 'bn' ? 'পানির বিল (টাকা)' : 'Water Bill';
-        document.getElementById('rWaste').placeholder = currentLang === 'bn' ? 'ময়লার বিল (টাকা)' : 'Waste Bill';
-        document.getElementById('rMeter').placeholder = currentLang === 'bn' ? 'মিটার নম্বর' : 'Meter Number';
-        document.getElementById('roomSubmitBtn').textContent = editRoomId !== null ? t('roomUpdateBtn') : t('roomSubmitBtn');
-        
-        document.getElementById('thRoomNo').textContent = t('thRoomNo');
-        document.getElementById('thRentAmt').textContent = t('thRentAmt');
-        document.getElementById('thGasBill').textContent = t('thGasBill');
-        document.getElementById('thWaterBill').textContent = t('thWaterBill');
-        document.getElementById('thWasteBill').textContent = t('thWasteBill');
-        document.getElementById('thMeterNo').textContent = t('thMeterNo');
-        document.getElementById('thRoomAction').textContent = t('thRoomAction');
-
-        document.getElementById('tenantTitle').textContent = t('tenantTitle');
-        document.getElementById('tName').placeholder = t('tNamePlaceholder');
-        document.getElementById('tPhone').placeholder = t('tPhonePlaceholder');
-        document.getElementById('tRoom').placeholder = t('tRoomPlaceholder');
-        document.getElementById('tNid').placeholder = t('tNidPlaceholder');
-        document.getElementById('tenantSubmitBtn').textContent = editTenantId !== null ? t('tenantUpdateBtn') : t('tenantSubmitBtn');
-        document.getElementById('thName').textContent = t('thName');
-        document.getElementById('thPhone').textContent = t('thPhone');
-        document.getElementById('thRoom').textContent = t('thRoom');
-        document.getElementById('thNid').textContent = t('thNid');
-        document.getElementById('thAction').textContent = t('thAction');
-
-        document.getElementById('rentTitle').textContent = t('rentTitle');
-        document.getElementById('dispRoom').placeholder = t('dispRoomPlaceholder');
-        document.getElementById('dispPhone').placeholder = t('dispPhonePlaceholder');
-        document.getElementById('rent').placeholder = t('rentPlaceholder');
-        document.getElementById('paid').placeholder = t('paidPlaceholder');
-        document.getElementById('due').placeholder = t('duePlaceholder');
-        document.getElementById('rentSubmitBtn').textContent = editRentId !== null ? t('rentUpdateBtn') : t('rentSubmitBtn');
-        document.getElementById('thRentDate').textContent = t('thRentDate');
-        document.getElementById('thRentName').textContent = t('thRentName');
-        document.getElementById('thRentAmount').textContent = t('thRentAmount');
-        document.getElementById('thPaidAmount').textContent = t('thPaidAmount');
-        document.getElementById('thDueStatus').textContent = t('thDueStatus');
-        document.getElementById('thRentAction').textContent = t('thRentAction');
-
+    function updateText() {
+        document.getElementById('mainTitle').textContent   = t('mainTitle');
+        document.getElementById('yearAllOpt').textContent  = t('yearAllOpt');
+        document.getElementById('lbTotalExp').textContent  = t('lbTotalExp');
+        document.getElementById('lbTotalDok').textContent  = t('lbTotalDok');
+        document.getElementById('lbExpCount').textContent  = t('lbExpCount');
+        document.getElementById('lbDokCount').textContent  = t('lbDokCount');
         document.getElementById('expenseTitle').textContent = t('expenseTitle');
-        document.getElementById('expDesc').placeholder = t('expDescPlaceholder');
-        document.getElementById('expAmount').placeholder = t('expAmountPlaceholder');
-        document.getElementById('expSubmitBtn').textContent = editExpId !== null ? t('expUpdateBtn') : t('expSubmitBtn');
-        document.getElementById('thExpDate').textContent = t('thExpDate');
-        document.getElementById('thExpDesc').textContent = t('thExpDesc');
-        document.getElementById('thExpAmount').textContent = t('thExpAmount');
-        document.getElementById('thExpAction').textContent = t('thExpAction');
-
-        document.getElementById('dokanBakiTitle').textContent = t('dokanBakiTitle');
-        document.getElementById('dokanDesc').placeholder = t('dokanDescPlaceholder');
-        document.getElementById('dokanAmount').placeholder = t('dokanAmountPlaceholder');
-        document.getElementById('dokanSubmitBtn').textContent = editDokanId !== null ? t('dokanUpdateBtn') : t('dokanSubmitBtn');
-        document.getElementById('thDokanDate').textContent = t('thDokanDate');
-        document.getElementById('thDokanDesc').textContent = t('thDokanDesc');
-        document.getElementById('thDokanAmount').textContent = t('thDokanAmount');
-        document.getElementById('thDokanAction').textContent = t('thDokanAction');
-
-        document.getElementById('printBtn').textContent = t('printBtn');
-        document.getElementById('langBtn').textContent = currentLang === 'bn' ? 'EN' : 'বাং';
-        
-        const cancelButtons = document.querySelectorAll('.cancel-btn');
-        cancelButtons.forEach(btn => btn.textContent = t('cancelBtn'));
-
-        populateFilters();
+        document.getElementById('dokanTitle').textContent  = t('dokanTitle');
+        document.getElementById('expDesc').placeholder     = t('expDescPh');
+        document.getElementById('expAmount').placeholder   = t('expAmtPh');
+        document.getElementById('expSubmitBtn').textContent = editExpId ? t('expUpdate') : t('expSubmit');
+        document.getElementById('dokanDesc').placeholder   = t('dokanDescPh');
+        document.getElementById('dokanAmount').placeholder = t('dokanAmtPh');
+        document.getElementById('dokanSubmitBtn').textContent = editDokId ? t('dokanUpdate') : t('dokanSubmit');
+        document.getElementById('thExpDate').textContent   = t('thExpDate');
+        document.getElementById('thExpDesc').textContent   = t('thExpDesc');
+        document.getElementById('thExpAmt').textContent    = t('thExpAmt');
+        document.getElementById('thExpAct').textContent    = t('thExpAct');
+        document.getElementById('thDokDate').textContent   = t('thDokDate');
+        document.getElementById('thDokDesc').textContent   = t('thDokDesc');
+        document.getElementById('thDokAmt').textContent    = t('thDokAmt');
+        document.getElementById('thDokAct').textContent    = t('thDokAct');
+        document.getElementById('printBtn').textContent    = t('printBtn');
+        document.getElementById('backupBtn').textContent   = t('backupBtn');
+        document.getElementById('restoreBtn').textContent  = t('restoreBtn');
+        document.getElementById('langBtn').textContent     = lang === 'bn' ? 'EN' : 'বাং';
+        document.querySelectorAll('.btn-cancel').forEach(b => b.textContent = t('cancelBtn'));
+        populateMonths();
         renderApp();
     }
 
-    let isListenersAttached = false;
-    function initApp() {
-        if(isListenersAttached) return;
-        isListenersAttached = true;
-
-        const today = new Date();
-        const curYear = today.getFullYear().toString();
-        document.getElementById('yearFilter').value = curYear;
-        populateFilters();
-
-        setDefaultDates();
-
-        db.collection('rooms').onSnapshot(snap => {
-            roomData = []; snap.forEach(doc => roomData.push({id: doc.id, ...doc.data()}));
-            renderApp();
-        }, err => console.log(err));
-
-        db.collection('tenants').onSnapshot(snap => {
-            tenantData = []; snap.forEach(doc => tenantData.push({id: doc.id, ...doc.data()}));
-            renderApp();
-        }, err => console.log(err));
-
-        db.collection('rents').onSnapshot(snap => {
-            rentData = []; snap.forEach(doc => rentData.push({id: doc.id, ...doc.data()}));
-            renderApp();
-        }, err => console.log(err));
-
-        db.collection('expenses').onSnapshot(snap => {
-            expData = []; snap.forEach(doc => expData.push({id: doc.id, ...doc.data()}));
-            renderApp();
-        }, err => console.log(err));
-
-        db.collection('dokanBaki').onSnapshot(snap => {
-            dokanData = []; snap.forEach(doc => dokanData.push({id: doc.id, ...doc.data()}));
-            renderApp();
-        }, err => console.log(err));
-
-        updateAllText();
+    // ══ THEME ══
+    function toggleTheme() {
+        document.body.classList.toggle('dark');
+        document.getElementById('themeBtn').textContent = document.body.classList.contains('dark') ? '🌙' : '☀️';
     }
 
-    function setDefaultDates() {
+    // ══ FILTERS ══
+    function populateMonths() {
+        const sel = document.getElementById('monthFilter');
+        const cur = sel.value || 'all';
+        sel.innerHTML = `<option value="all">${lang === 'bn' ? 'সব মাস' : 'All Months'}</option>`;
+        t('months').forEach((m, i) => {
+            sel.innerHTML += `<option value="${String(i+1).padStart(2,'0')}">${m}</option>`;
+        });
+        sel.value = cur;
+    }
+
+    // ══ INIT ══
+    let appStarted = false;
+    function initApp() {
+        if (appStarted) return;
+        appStarted = true;
+
+        // Set current year
+        const yr = new Date().getFullYear().toString();
+        document.getElementById('yearFilter').value = yr;
+        populateMonths();
+        setDates();
+
+        // Firestore listeners
+        db.collection('expenses').onSnapshot(snap => {
+            expData = []; snap.forEach(d => expData.push({id: d.id, ...d.data()}));
+            renderApp();
+        }, console.error);
+
+        db.collection('dokanBaki').onSnapshot(snap => {
+            dokData = []; snap.forEach(d => dokData.push({id: d.id, ...d.data()}));
+            renderApp();
+        }, console.error);
+
+        updateText();
+    }
+
+    function setDates() {
         const today = new Date().toISOString().split('T')[0];
-        document.getElementById('rentDate').value = today;
-        document.getElementById('expDate').value = today;
+        document.getElementById('expDate').value   = today;
         document.getElementById('dokanDate').value = today;
     }
 
-    function populateFilters() {
-        const mSelect = document.getElementById('monthFilter');
-        const currentSel = mSelect.value || 'all';
-        mSelect.innerHTML = `<option value="all">${currentLang === 'bn' ? 'সব মাস' : 'All Months'}</option>`;
-        t('months').forEach((m, idx) => {
-            const val = (idx + 1).toString().padStart(2, '0');
-            mSelect.innerHTML += `<option value="${val}">${m}</option>`;
-        });
-        mSelect.value = currentSel;
-    }
-
-    function toggleTheme() {
-        document.body.classList.toggle('dark-theme');
-        const isDark = document.body.classList.contains('dark-theme');
-        document.getElementById('themeBtn').textContent = isDark ? '🌙' : '☀️';
-    }
-
-    function formatCurrency(amt) {
-        return t('currencySymbol') + amt.toLocaleString();
-    }
-
-    // --- SUBMISSIONS HANDLERS ---
-    document.getElementById('roomForm').onsubmit = (e) => {
+    // ══ FORM SUBMIT — EXPENSE ══
+    document.getElementById('expForm').onsubmit = e => {
         e.preventDefault();
-        const rObj = {
-            roomNo: document.getElementById('rNo').value.trim(),
-            rentAmount: +document.getElementById('rRent').value,
-            gasBill: +document.getElementById('rGas').value || 0,
-            waterBill: +document.getElementById('rWater').value || 0,
-            wasteBill: +document.getElementById('rWaste').value || 0,
-            meterNo: document.getElementById('rMeter').value.trim()
-        };
-        if(editRoomId !== null) {
-            db.collection('rooms').doc(editRoomId).update(rObj).catch(err => alert("Error: " + err.message));
-        } else {
-            db.collection('rooms').add(rObj).catch(err => alert("Error: " + err.message));
-        }
-        resetEditState();
-    };
-
-    document.getElementById('tenantForm').onsubmit = (e) => {
-        e.preventDefault();
-        const tObj = {
-            name: document.getElementById('tName').value.trim(),
-            phone: document.getElementById('tPhone').value.trim(),
-            room: document.getElementById('tRoom').value.trim(),
-            nid: document.getElementById('tNid').value.trim()
-        };
-        if(editTenantId !== null) {
-            db.collection('tenants').doc(editTenantId).update(tObj).catch(err => alert("Error: " + err.message));
-        } else {
-            db.collection('tenants').add(tObj).catch(err => alert("Error: " + err.message));
-        }
-        resetEditState();
-    };
-
-    function fillTenantDetails() {
-        const tenantId = document.getElementById('tenantSelect').value;
-        if(tenantId) {
-            const tObj = tenantData.find(tn => tn.id === tenantId);
-            if(tObj) {
-                document.getElementById('dispRoom').value = tObj.room;
-                document.getElementById('dispPhone').value = tObj.phone;
-                const rObj = roomData.find(rm => rm.roomNo.trim() === tObj.room.trim());
-                if(rObj) {
-                    const totalCost = rObj.rentAmount + (rObj.gasBill || 0) + (rObj.waterBill || 0) + (rObj.wasteBill || 0);
-                    document.getElementById('rent').value = totalCost;
-                } else {
-                    document.getElementById('rent').value = '';
-                }
-            }
-        } else {
-            document.getElementById('dispRoom').value = '';
-            document.getElementById('dispPhone').value = '';
-            document.getElementById('rent').value = '';
-        }
-        calcDue();
-    }
-
-    function calcDue() {
-        const r = parseFloat(document.getElementById('rent').value) || 0;
-        const p = parseFloat(document.getElementById('paid').value) || 0;
-        document.getElementById('due').value = (r - p);
-    }
-
-    document.getElementById('rentForm').onsubmit = (e) => {
-        e.preventDefault();
-        const tenantId = document.getElementById('tenantSelect').value;
-        if(tenantId === "" && editRentId === null) return;
-        const tenantObj = tenantData.find(t => t.id === tenantId);
-        const fallBackRent = rentData.find(r => r.id === editRentId);
-        const rObj = {
-            date: document.getElementById('rentDate').value,
-            tenant: tenantObj ? tenantObj.name.trim() : (fallBackRent ? fallBackRent.tenant : ''),
-            phone: document.getElementById('dispPhone').value.trim(),
-            room: document.getElementById('dispRoom').value.trim(),
-            rent: +document.getElementById('rent').value,
-            paid: +document.getElementById('paid').value,
-            due: +document.getElementById('due').value
-        };
-        if(editRentId !== null) {
-            db.collection('rents').doc(editRentId).update(rObj).catch(err => alert("Error: " + err.message));
-        } else {
-            db.collection('rents').add(rObj).catch(err => alert("Error: " + err.message));
-        }
-        resetEditState();
-    };
-
-    document.getElementById('expForm').onsubmit = (e) => {
-        e.preventDefault();
-        const eObj = {
-            date: document.getElementById('expDate').value,
-            desc: document.getElementById('expDesc').value.trim(),
+        const obj = {
+            date:   document.getElementById('expDate').value,
+            desc:   document.getElementById('expDesc').value.trim(),
             amount: +document.getElementById('expAmount').value
         };
-        if(editExpId !== null) {
-            db.collection('expenses').doc(editExpId).update(eObj).catch(err => alert("Error: " + err.message));
-        } else {
-            db.collection('expenses').add(eObj).catch(err => alert("Error: " + err.message));
-        }
-        resetEditState();
+        const col = db.collection('expenses');
+        (editExpId ? col.doc(editExpId).update(obj) : col.add(obj))
+            .catch(err => alert('Error: ' + err.message));
+        resetEdit();
     };
 
-    document.getElementById('dokanForm').onsubmit = (e) => {
+    // ══ FORM SUBMIT — DOKAN ══
+    document.getElementById('dokanForm').onsubmit = e => {
         e.preventDefault();
-        const dObj = {
-            date: document.getElementById('dokanDate').value,
-            desc: document.getElementById('dokanDesc').value.trim(),
+        const obj = {
+            date:   document.getElementById('dokanDate').value,
+            desc:   document.getElementById('dokanDesc').value.trim(),
             amount: +document.getElementById('dokanAmount').value
         };
-        if(editDokanId !== null) {
-            db.collection('dokanBaki').doc(editDokanId).update(dObj).catch(err => alert("Error: " + err.message));
-        } else {
-            db.collection('dokanBaki').add(dObj).catch(err => alert("Error: " + err.message));
-        }
-        resetEditState();
+        const col = db.collection('dokanBaki');
+        (editDokId ? col.doc(editDokId).update(obj) : col.add(obj))
+            .catch(err => alert('Error: ' + err.message));
+        resetEdit();
     };
 
+    // ══ EDIT ══
     function startEdit(type, id) {
-        if(type === 'room') {
-            editRoomId = id;
-            const r = roomData.find(rm => rm.id === id);
-            if(!r) return;
-            document.getElementById('rNo').value = r.roomNo;
-            document.getElementById('rRent').value = r.rentAmount;
-            document.getElementById('rGas').value = r.gasBill;
-            document.getElementById('rWater').value = r.waterBill;
-            document.getElementById('rWaste').value = r.wasteBill;
-            document.getElementById('rMeter').value = r.meterNo;
-            document.getElementById('roomSubmitBtn').innerText = t('roomUpdateBtn');
-            document.getElementById('roomSubmitBtn').style.background = "var(--ios-orange)";
-            document.getElementById('roomCancelBtn').style.display = "inline-block";
-            document.getElementById('rNo').focus();
-        } else if(type === 'tenant') {
-            editTenantId = id;
-            const tn = tenantData.find(t => t.id === id);
-            if(!tn) return;
-            document.getElementById('tName').value = tn.name;
-            document.getElementById('tPhone').value = tn.phone;
-            document.getElementById('tRoom').value = tn.room;
-            document.getElementById('tNid').value = tn.nid;
-            document.getElementById('tenantSubmitBtn').innerText = t('tenantUpdateBtn');
-            document.getElementById('tenantSubmitBtn').style.background = "var(--ios-orange)";
-            document.getElementById('tenantCancelBtn').style.display = "inline-block";
-            document.getElementById('tName').focus();
-        } else if(type === 'rent') {
-            editRentId = id;
-            const r = rentData.find(rt => rt.id === id);
-            if(!r) return;
-            document.getElementById('rentDate').value = r.date;
-            const matchedTenant = tenantData.find(tn => tn.name.trim() === r.tenant.trim() && tn.room.trim() === r.room.trim());
-            document.getElementById('tenantSelect').value = matchedTenant ? matchedTenant.id : "";
-            document.getElementById('dispRoom').value = r.room;
-            document.getElementById('dispPhone').value = r.phone;
-            document.getElementById('rent').value = r.rent;
-            document.getElementById('paid').value = r.paid;
-            document.getElementById('due').value = r.due;
-            document.getElementById('rentSubmitBtn').innerText = t('rentUpdateBtn');
-            document.getElementById('rentSubmitBtn').style.background = "var(--ios-orange)";
-            document.getElementById('rentCancelBtn').style.display = "inline-block";
-            document.getElementById('rent').focus();
-        } else if(type === 'exp') {
+        if (type === 'exp') {
+            const r = expData.find(x => x.id === id); if (!r) return;
             editExpId = id;
-            const e = expData.find(exp => exp.id === id);
-            if(!e) return;
-            document.getElementById('expDate').value = e.date;
-            document.getElementById('expDesc').value = e.desc;
-            document.getElementById('expAmount').value = e.amount;
-            document.getElementById('expSubmitBtn').innerText = t('expUpdateBtn');
-            document.getElementById('expSubmitBtn').style.background = "var(--accent-blue)";
-            document.getElementById('expCancelBtn').style.display = "inline-block";
+            document.getElementById('expDate').value   = r.date;
+            document.getElementById('expDesc').value   = r.desc;
+            document.getElementById('expAmount').value = r.amount;
+            document.getElementById('expSubmitBtn').textContent = t('expUpdate');
+            document.getElementById('expSubmitBtn').style.background = 'var(--sage)';
+            document.getElementById('expCancelBtn').style.display = 'inline-block';
             document.getElementById('expDesc').focus();
-        } else if(type === 'dokan') {
-            editDokanId = id;
-            const d = dokanData.find(dokan => dokan.id === id);
-            if(!d) return;
-            document.getElementById('dokanDate').value = d.date;
-            document.getElementById('dokanDesc').value = d.desc;
-            document.getElementById('dokanAmount').value = d.amount;
-            document.getElementById('dokanSubmitBtn').innerText = t('dokanUpdateBtn');
-            document.getElementById('dokanSubmitBtn').style.background = "var(--ios-orange)";
-            document.getElementById('dokanCancelBtn').style.display = "inline-block";
+        } else {
+            const r = dokData.find(x => x.id === id); if (!r) return;
+            editDokId = id;
+            document.getElementById('dokanDate').value   = r.date;
+            document.getElementById('dokanDesc').value   = r.desc;
+            document.getElementById('dokanAmount').value = r.amount;
+            document.getElementById('dokanSubmitBtn').textContent = t('dokanUpdate');
+            document.getElementById('dokanSubmitBtn').style.background = 'var(--sage)';
+            document.getElementById('dokanCancelBtn').style.display = 'inline-block';
             document.getElementById('dokanDesc').focus();
         }
+        // Scroll to the relevant form
+        const formId = type === 'exp' ? 'expForm' : 'dokanForm';
+        document.getElementById(formId).scrollIntoView({behavior:'smooth', block:'nearest'});
     }
 
     function del(type, id) {
-        if(confirm(t('deleteConfirm'))) {
-            if(type === 'room') db.collection('rooms').doc(id).delete();
-            if(type === 'tenant') db.collection('tenants').doc(id).delete();
-            if(type === 'rent') db.collection('rents').doc(id).delete();
-            if(type === 'exp') db.collection('expenses').doc(id).delete();
-            if(type === 'dokan') db.collection('dokanBaki').doc(id).delete();
-        }
+        if (!confirm(t('deleteConfirm'))) return;
+        if (type === 'exp') db.collection('expenses').doc(id).delete();
+        else                db.collection('dokanBaki').doc(id).delete();
     }
 
-    function resetEditState() {
-        editRoomId = null; editTenantId = null; editRentId = null; editExpId = null; editDokanId = null;
-        document.getElementById('roomForm').reset();
-        document.getElementById('tenantForm').reset();
-        document.getElementById('rentForm').reset();
+    function resetEdit() {
+        editExpId = null; editDokId = null;
         document.getElementById('expForm').reset();
         document.getElementById('dokanForm').reset();
-        setDefaultDates();
-        
-        document.getElementById('roomSubmitBtn').innerText = t('roomSubmitBtn');
-        document.getElementById('roomSubmitBtn').style.background = "var(--accent-blue)";
-        document.getElementById('roomCancelBtn').style.display = "none";
-        
-        document.getElementById('tenantSubmitBtn').innerText = t('tenantSubmitBtn');
-        document.getElementById('tenantSubmitBtn').style.background = "var(--ios-green)";
-        document.getElementById('tenantCancelBtn').style.display = "none";
-        
-        document.getElementById('rentSubmitBtn').innerText = t('rentSubmitBtn');
-        document.getElementById('rentSubmitBtn').style.background = "var(--accent-blue)";
-        document.getElementById('rentCancelBtn').style.display = "none";
-        
-        document.getElementById('expSubmitBtn').innerText = t('expSubmitBtn');
-        document.getElementById('expSubmitBtn').style.background = "var(--accent-blue)";
-        document.getElementById('expCancelBtn').style.display = "none";
-        
-        document.getElementById('dokanSubmitBtn').innerText = t('dokanSubmitBtn');
-        document.getElementById('dokanSubmitBtn').style.background = "var(--ios-red)";
-        document.getElementById('dokanCancelBtn').style.display = "none";
+        setDates();
+
+        document.getElementById('expSubmitBtn').textContent = t('expSubmit');
+        document.getElementById('expSubmitBtn').style.background = 'var(--green)';
+        document.getElementById('expCancelBtn').style.display = 'none';
+
+        document.getElementById('dokanSubmitBtn').textContent = t('dokanSubmit');
+        document.getElementById('dokanSubmitBtn').style.background = 'var(--red)';
+        document.getElementById('dokanCancelBtn').style.display = 'none';
     }
 
-    function sendWhatsAppReminder(id) {
-        const item = rentData.find(r => r.id === id);
-        if (!item || item.due <= 0) return;
-        let phone = item.phone.trim().replace(/[^0-9]/g, '');
-        if (phone.startsWith('0')) { phone = '88' + phone; }
-        
-        let message = currentLang === 'bn' ? 
-            `আসসালামু আলাইকুম/নমস্কার ${item.tenant} সাহেব, নাহিদ কুটির (রুম নং: ${item.room}) থেকে জানানো যাচ্ছে যে আপনার বর্তমান বকেয়া ${formatCurrency(item.due)}। অনুগ্রহ করে দ্রুত পরিশোধ করুন। ধন্যবাদ!` :
-            `Hello ${item.tenant}, this is a reminder from Nahid Kutir (Room: ${item.room}). Your current due is ${formatCurrency(item.due)}. Please process the payment soon. Thank you!`;
-        
-        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
-    }
-
-    // --- RENDER APPLICATION VIEW ---
+    // ══ RENDER ══
     function renderApp() {
-        if(document.getElementById('mainContainer').style.display === 'none') return;
-        
-        const yearFilter = document.getElementById('yearFilter').value;
-        const monthFilter = document.getElementById('monthFilter').value;
+        if (document.getElementById('mainContainer').style.display === 'none') return;
 
-        // 1. Rooms Update
-        const roomBody = document.getElementById('roomBody');
-        roomBody.innerHTML = '';
-        let tenantExpectedCapacity = 0;
-        roomData.sort((a,b) => a.roomNo.localeCompare(b.roomNo, undefined, {numeric: true})).forEach(rm => {
-            roomBody.innerHTML += `<tr>
-                <td><b>${escapeHTML(rm.roomNo)}</b></td>
-                <td>${formatCurrency(rm.rentAmount)}</td>
-                <td>${formatCurrency(rm.gasBill)}</td>
-                <td>${formatCurrency(rm.waterBill)}</td>
-                <td>${formatCurrency(rm.wasteBill)}</td>
-                <td>${escapeHTML(rm.meterNo || '-')}</td>
-                <td class="no-print">
-                    <button onclick="startEdit('room', '${rm.id}')" class="action-btn" style="color:var(--accent-blue)">✎</button>
-                    <button onclick="del('room', '${rm.id}')" class="action-btn" style="color:var(--ios-red)">✕</button>
-                </td>
-            </tr>`;
-        });
+        const yr = document.getElementById('yearFilter').value;
+        const mo = document.getElementById('monthFilter').value;
 
-        // 2. Tenants Update
-        const tenantBody = document.getElementById('tenantBody');
-        const tenantSelect = document.getElementById('tenantSelect');
-        const currentTenantSelection = tenantSelect.value || "";
-        tenantBody.innerHTML = '';
-        tenantSelect.innerHTML = `<option value="">${t('rentSelectOpt')}</option>`;
-        
-        tenantData.sort((a,b) => a.room.localeCompare(b.room, undefined, {numeric: true})).forEach(tn => {
-            const matchedRoom = roomData.find(r => r.roomNo.trim() === tn.room.trim());
-            if(matchedRoom) {
-                tenantExpectedCapacity += matchedRoom.rentAmount + (matchedRoom.gasBill || 0) + (matchedRoom.waterBill || 0) + (matchedRoom.wasteBill || 0);
-            }
-            tenantBody.innerHTML += `<tr>
-                <td>${escapeHTML(tn.name)}</td>
-                <td>${escapeHTML(tn.phone)}</td>
-                <td><span style="background:var(--ios-input); padding: 4px 10px; border-radius: var(--pill-btn); font-weight:bold;">${escapeHTML(tn.room)}</span></td>
-                <td>${escapeHTML(tn.nid || '-')}</td>
-                <td class="no-print">
-                    <button onclick="startEdit('tenant', '${tn.id}')" class="action-btn" style="color:var(--accent-blue)">✎</button>
-                    <button onclick="del('tenant', '${tn.id}')" class="action-btn" style="color:var(--ios-red)">✕</button>
-                </td>
-            </tr>`;
-            tenantSelect.innerHTML += `<option value="${tn.id}">${escapeHTML(tn.name)} (${escapeHTML(t('roomText'))}: ${escapeHTML(tn.room)})</option>`;
-        });
-        if (currentTenantSelection !== "") { tenantSelect.value = currentTenantSelection; }
+        function inRange(date) {
+            if (!date) return false;
+            const p = date.split('-');
+            return (yr === 'all' || p[0] === yr) && (mo === 'all' || p[1] === mo);
+        }
 
-        // 3. Rents Filtering & Update
-        const rentBody = document.getElementById('rentBody');
-        rentBody.innerHTML = '';
-        let totalExpectedSum = 0;
-        let totalIncome = 0;
-        
-        rentData.filter(rt => {
-            if(!rt.date) return false;
-            const parts = rt.date.split('-');
-            const matchY = (yearFilter === 'all' || parts[0] === yearFilter);
-            const matchM = (monthFilter === 'all' || parts[1] === monthFilter);
-            return matchY && matchM;
-        }).sort((a,b) => b.date.localeCompare(a.date)).forEach(rt => {
-            totalExpectedSum += (rt.rent || 0);
-            totalIncome += (rt.paid || 0);
-            const statusStr = rt.due <= 0 ? 
-                `<span style="color:var(--ios-green); font-weight:bold;">${t('paidStatus')}</span>` : 
-                `<span style="color:var(--ios-red); font-weight:bold;">${t('dueStatus')} ${formatCurrency(rt.due)} ${t('dueSuffix')}</span>`;
-                
-            const waButton = rt.due > 0 ? `<button onclick="sendWhatsAppReminder('${rt.id}')" class="action-btn" style="margin-left:5px;">💬</button>` : '';
-
-            rentBody.innerHTML += `<tr>
-                <td>${escapeHTML(rt.date)}</td>
-                <td><b>${escapeHTML(rt.tenant)}</b> (${escapeHTML(t('roomText'))}: ${escapeHTML(rt.room)})</td>
-                <td>${formatCurrency(rt.rent)}</td>
-                <td>${formatCurrency(rt.paid)}</td>
-                <td>${statusStr} ${waButton}</td>
-                <td class="no-print">
-                    <button onclick="startEdit('rent', '${rt.id}')" class="action-btn" style="color:var(--accent-blue)">✎</button>
-                    <button onclick="del('rent', '${rt.id}')" class="action-btn" style="color:var(--ios-red)">✕</button>
-                </td>
-            </tr>`;
-        });
-
-        // 4. Expenses Filtering & Update
+        // — Expenses —
         const expBody = document.getElementById('expBody');
         expBody.innerHTML = '';
         let totalExp = 0;
-        
-        expData.filter(ex => {
-            if(!ex.date) return false;
-            const parts = ex.date.split('-');
-            return (yearFilter === 'all' || parts[0] === yearFilter) && (monthFilter === 'all' || parts[1] === monthFilter);
-        }).sort((a,b) => b.date.localeCompare(a.date)).forEach(ex => {
+        const filteredExp = expData.filter(x => inRange(x.date)).sort((a,b) => b.date.localeCompare(a.date));
+        filteredExp.forEach(ex => {
             totalExp += (ex.amount || 0);
             expBody.innerHTML += `<tr>
-                <td>${escapeHTML(ex.date)}</td>
-                <td>${escapeHTML(ex.desc)}</td>
-                <td style="color:var(--ios-red); font-weight:bold;">-${formatCurrency(ex.amount)}</td>
+                <td>${esc(ex.date)}</td>
+                <td>${esc(ex.desc)}</td>
+                <td style="color:var(--red);font-weight:bold;">-${fc(ex.amount)}</td>
                 <td class="no-print">
-                    <button onclick="startEdit('exp', '${ex.id}')" class="action-btn" style="color:var(--accent-blue)">✎</button>
-                    <button onclick="del('exp', '${ex.id}')" class="action-btn" style="color:var(--ios-red)">✕</button>
+                    <button onclick="startEdit('exp','${ex.id}')" class="act-btn" style="color:var(--green)">✎</button>
+                    <button onclick="del('exp','${ex.id}')"       class="act-btn" style="color:var(--red)">✕</button>
                 </td>
             </tr>`;
         });
-
-        // 5. Dokan Baki Filter & Update
-        const dokanBody = document.getElementById('dokanBody');
-        dokanBody.innerHTML = '';
-        let totalDokan = 0;
-        
-        dokanData.filter(dk => {
-            if(!dk.date) return false;
-            const parts = dk.date.split('-');
-            return (yearFilter === 'all' || parts[0] === yearFilter) && (monthFilter === 'all' || parts[1] === monthFilter);
-        }).sort((a,b) => b.date.localeCompare(a.date)).forEach(dk => {
-            totalDokan += (dk.amount || 0);
-            dokanBody.innerHTML += `<tr>
-                <td>${escapeHTML(dk.date)}</td>
-                <td>${escapeHTML(dk.desc)}</td>
-                <td style="color:var(--ios-red); font-weight:bold;">${formatCurrency(dk.amount)}</td>
-                <td class="no-print">
-                    <button onclick="startEdit('dokan', '${dk.id}')" class="action-btn" style="color:var(--accent-blue)">✎</button>
-                    <button onclick="del('dokan', '${dk.id}')" class="action-btn" style="color:var(--ios-red)">✕</button>
-                </td>
-            </tr>`;
-        });
-
-        if(dokanData.length > 0) {
-            dokanBody.innerHTML += `<tr style="font-weight:bold; border-top: 2px solid var(--card-border); background: var(--ios-input)">
-                <td>${escapeHTML(t('totalText'))}</td>
-                <td>-</td>
-                <td style="color:var(--ios-red);">${formatCurrency(totalDokan)}</td>
+        if (filteredExp.length > 0) {
+            expBody.innerHTML += `<tr style="font-weight:bold;background:var(--input)">
+                <td>${esc(t('totalRow'))}</td><td>—</td>
+                <td style="color:var(--red);">-${fc(totalExp)}</td>
                 <td class="no-print"></td>
             </tr>`;
         }
-        
-        // --- CALC DISTRIBUTED DUE ---
-        let displayedExpected = totalExpectedSum;
-        if (monthFilter !== 'all' && yearFilter !== 'all') {
-            const today = new Date();
-            const curYear = today.getFullYear();
-            const curMonth = today.getMonth() + 1;
-            
-            const selectedYear = parseInt(yearFilter, 10);
-            const selectedMonth = parseInt(monthFilter, 10);
-            const isCurrentOrFuture = (selectedYear > curYear) || (selectedYear === curYear && selectedMonth >= curMonth);
-            
-            if (isCurrentOrFuture) {
-                displayedExpected = totalExpectedSum > 0 ? Math.max(totalExpectedSum, tenantExpectedCapacity) : tenantExpectedCapacity;
-            }
+
+        // — Dokan —
+        const dokBody = document.getElementById('dokanBody');
+        dokBody.innerHTML = '';
+        let totalDok = 0;
+        const filteredDok = dokData.filter(x => inRange(x.date)).sort((a,b) => b.date.localeCompare(a.date));
+        filteredDok.forEach(dk => {
+            totalDok += (dk.amount || 0);
+            dokBody.innerHTML += `<tr>
+                <td>${esc(dk.date)}</td>
+                <td>${esc(dk.desc)}</td>
+                <td style="color:var(--red);font-weight:bold;">${fc(dk.amount)}</td>
+                <td class="no-print">
+                    <button onclick="startEdit('dok','${dk.id}')" class="act-btn" style="color:var(--green)">✎</button>
+                    <button onclick="del('dok','${dk.id}')"       class="act-btn" style="color:var(--red)">✕</button>
+                </td>
+            </tr>`;
+        });
+        if (filteredDok.length > 0) {
+            dokBody.innerHTML += `<tr style="font-weight:bold;background:var(--input)">
+                <td>${esc(t('totalRow'))}</td><td>—</td>
+                <td style="color:var(--red);">${fc(totalDok)}</td>
+                <td class="no-print"></td>
+            </tr>`;
         }
-        
-        let totalDue = displayedExpected - totalIncome;
-        
-        document.getElementById('d-rent').innerText = formatCurrency(displayedExpected);
-        document.getElementById('d-income').innerText = formatCurrency(totalIncome);
-        document.getElementById('d-expense').innerText = formatCurrency(totalExp);
-        document.getElementById('d-due').innerText = formatCurrency(totalDue);
+
+        // — Summary cards —
+        document.getElementById('d-expense').textContent  = fc(totalExp);
+        document.getElementById('d-dokan').textContent    = fc(totalDok);
+        document.getElementById('d-expcount').textContent = filteredExp.length;
+        document.getElementById('d-dokcount').textContent = filteredDok.length;
     }
 
-    // --- JSON SYSTEM BACKUP AND RESTORE ---
+    // ══ BACKUP ══
     async function triggerBackup() {
         try {
-            const roomsSnap = await db.collection('rooms').get();
-            const tenantsSnap = await db.collection('tenants').get();
-            const rentsSnap = await db.collection('rents').get();
-            const expensesSnap = await db.collection('expenses').get();
-            const dokanSnap = await db.collection('dokanBaki').get();
+            const [expSnap, dokSnap] = await Promise.all([
+                db.collection('expenses').get(),
+                db.collection('dokanBaki').get()
+            ]);
+            const data = { expenses:[], dokanBaki:[] };
+            expSnap.forEach(d => data.expenses.push(d.data()));
+            dokSnap.forEach(d => data.dokanBaki.push(d.data()));
 
-            const backupData = {
-                rooms: [], tenants: [], rents: [], expenses: [], dokanBaki: []
-            };
-
-            roomsSnap.forEach(d => backupData.rooms.push(d.data()));
-            tenantsSnap.forEach(d => backupData.tenants.push(d.data()));
-            rentsSnap.forEach(d => backupData.rents.push(d.data()));
-            expensesSnap.forEach(d => backupData.expenses.push(d.data()));
-            dokanSnap.forEach(d => backupData.dokanBaki.push(d.data()));
-
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `Nahid_Kutir_Backup_${new Date().toISOString().split('T')[0]}.json`);
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-        } catch (err) {
-            alert("ব্যাকআপ তৈরি করতে সমস্যা হয়েছে: " + err.message);
-        }
+            const a = document.createElement('a');
+            a.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data, null, 2));
+            a.download = `NahidKutir_ExpDokan_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a); a.click(); a.remove();
+        } catch(err) { alert('ব্যাকআপ ব্যর্থ: ' + err.message); }
     }
 
+    // ══ RESTORE ══
     function handleRestore(event) {
         const file = event.target.files[0];
         if (!file) return;
-
         const reader = new FileReader();
         reader.onload = async function(e) {
             try {
                 const data = JSON.parse(e.target.result);
-                if (confirm("আপনি কি নিশ্চিত যে এই ডাটা রিস্টোর করবেন? এটি আপনার ফায়ারবেস ক্লাউডে নতুন ইউনিক ডাটা মার্জ করবে।")) {
-                    let batch = db.batch();
-                    let operationsCount = 0;
+                if (!confirm('ডাটা রিস্টোর করবেন? ডুপ্লিকেট এড়িয়ে মার্জ হবে।')) return;
 
-                    const commitBatchIfNeeded = async () => {
-                        if (operationsCount >= 400) {
-                            await batch.commit();
-                            batch = db.batch();
-                            operationsCount = 0;
-                        }
-                    };
+                let batch = db.batch();
+                let ops = 0;
+                const flush = async () => { if (ops >= 400) { await batch.commit(); batch = db.batch(); ops = 0; } };
 
-                    if (data.rooms && Array.isArray(data.rooms)) {
-                        for (const item of data.rooms) {
-                            if (!roomData.some(r => r.roomNo.trim() === item.roomNo.trim())) {
-                                const docRef = db.collection('rooms').doc();
-                                batch.set(docRef, item);
-                                operationsCount++;
-                                await commitBatchIfNeeded();
-                            }
+                if (Array.isArray(data.expenses)) {
+                    for (const item of data.expenses) {
+                        if (!expData.some(x => x.date === item.date && x.desc?.trim() === item.desc?.trim() && x.amount === item.amount)) {
+                            batch.set(db.collection('expenses').doc(), item); ops++; await flush();
                         }
                     }
-                    if (data.tenants && Array.isArray(data.tenants)) {
-                        for (const item of data.tenants) {
-                            if (!tenantData.some(t => t.name.trim() === item.name.trim() && t.room.trim() === item.room.trim())) {
-                                const docRef = db.collection('tenants').doc();
-                                batch.set(docRef, item);
-                                operationsCount++;
-                                await commitBatchIfNeeded();
-                            }
-                        }
-                    }
-                    if (data.rents && Array.isArray(data.rents)) {
-                        for (const item of data.rents) {
-                            if (!rentData.some(r => r.date === item.date && r.tenant.trim() === item.tenant.trim() && r.room.trim() === item.room.trim() && r.paid === item.paid)) {
-                                const docRef = db.collection('rents').doc();
-                                batch.set(docRef, item);
-                                operationsCount++;
-                                await commitBatchIfNeeded();
-                            }
-                        }
-                    }
-                    if (data.expenses && Array.isArray(data.expenses)) {
-                        for (const item of data.expenses) {
-                            if (!expData.some(e => e.date === item.date && e.desc.trim() === item.desc.trim() && e.amount === item.amount)) {
-                                const docRef = db.collection('expenses').doc();
-                                batch.set(docRef, item);
-                                operationsCount++;
-                                await commitBatchIfNeeded();
-                            }
-                        }
-                    }
-                    if (data.dokanBaki && Array.isArray(data.dokanBaki)) {
-                        for (const item of data.dokanBaki) {
-                            if (!dokanData.some(d => d.date === item.date && d.desc.trim() === item.desc.trim() && d.amount === item.amount)) {
-                                const docRef = db.collection('dokanBaki').doc();
-                                batch.set(docRef, item);
-                                operationsCount++;
-                                await commitBatchIfNeeded();
-                            }
-                        }
-                    }
-
-                    if (operationsCount > 0) { await batch.commit(); }
-                    alert("ডাটা সফলভাবে ক্লাউডের সাথে রিস্টোর এবং সিঙ্ক করা হয়েছে! (ডুপ্লিকেট এড়ানো হয়েছে)");
-                    resetEditState();
                 }
-            } catch (err) {
-                alert("ডাটা ফাইলটি সঠিক নয়: " + err.message);
-            }
+                if (Array.isArray(data.dokanBaki)) {
+                    for (const item of data.dokanBaki) {
+                        if (!dokData.some(x => x.date === item.date && x.desc?.trim() === item.desc?.trim() && x.amount === item.amount)) {
+                            batch.set(db.collection('dokanBaki').doc(), item); ops++; await flush();
+                        }
+                    }
+                }
+                if (ops > 0) await batch.commit();
+                alert('রিস্টোর সফল! ডুপ্লিকেট এড়ানো হয়েছে।');
+                resetEdit();
+            } catch(err) { alert('ফাইল সঠিক নয়: ' + err.message); }
         };
         reader.readAsText(file);
+        event.target.value = '';
     }
 </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>নাহিদ কুটির — খরচ ও দোকান বাকি</title>
 
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        /* --- CSS VARIABLES --- */
+        :root {
+            --bg:          #faf9f5;
+            --card:        #ffffff;
+            --input:       #eef6eb;
+            --text:        #1e2b22;
+            --muted:       #526658;
+            --green:       #37713d;
+            --sage:        #b2ce9f;
+            --red:         #d32f2f;
+            --border:      rgba(55,113,61,0.08);
+            --pill-lg:     32px;
+            --pill-md:     20px;
+            --pill-btn:    50px;
+        }
+        body.dark {
+            --bg:    #111a14;
+            --card:  #19241d;
+            --input: #223127;
+            --text:  #faf9f5;
+            --muted: #8ca394;
+            --green: #4caf50;
+            --sage:  #37713d;
+            --red:   #ff5252;
+            --border:rgba(255,255,255,0.06);
+        }
+
+        * { box-sizing:border-box; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif; -webkit-tap-highlight-color:transparent; }
+
+        body { background:var(--bg); color:var(--text); margin:0; padding:16px 12px; transition:background .3s,color .3s; }
+
+        /* ── MAIN CONTAINER ── */
+        .main { max-width:1400px; margin:0 auto; display:none; }
+
+        /* ── HEADER ── */
+        .header {
+            display:flex; justify-content:space-between; align-items:center;
+            flex-wrap:wrap; gap:12px; margin-bottom:22px;
+        }
+        .header h1 { margin:0; font-size:22px; font-weight:800; color:var(--green); }
+        .header-btns { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+
+        /* ── SUMMARY CARDS ── */
+        .summary {
+            display:grid; grid-template-columns:repeat(2,1fr);
+            gap:12px; margin-bottom:24px;
+        }
+        .sum-card {
+            background:var(--card); border:1px solid var(--border);
+            border-radius:var(--pill-md); padding:16px 12px; text-align:center;
+            transition:transform .2s;
+        }
+        .sum-card:hover { transform:translateY(-2px); }
+        .sum-card h4 { margin:0 0 6px; font-size:11px; text-transform:uppercase; letter-spacing:.5px; font-weight:700; }
+        .sum-card p  { margin:0; font-size:16px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+        /* ── FILTER BAR ── */
+        .filter-bar {
+            display:flex; flex-wrap:wrap; gap:10px; margin-bottom:24px;
+            background:var(--sage); padding:10px 14px;
+            border-radius:var(--pill-btn); box-shadow:0 6px 20px rgba(55,113,61,.15);
+            width:fit-content; max-width:100%;
+        }
+        .filter-bar select {
+            margin-bottom:0; padding:8px 36px 8px 16px; font-size:14px;
+            background:var(--card); border:none; border-radius:var(--pill-btn);
+            cursor:pointer; width:auto; min-width:120px;
+            color:var(--text);
+            appearance:none; -webkit-appearance:none;
+            background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23526658' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat:no-repeat; background-position:right 12px center;
+        }
+
+        /* ── TWO-COL LAYOUT ── */
+        .cols { display:grid; grid-template-columns:1fr; gap:24px; margin-bottom:24px; }
+
+        /* ── CARD BOX ── */
+        .card-box {
+            background:var(--card); border:1px solid var(--border);
+            padding:20px 16px; border-radius:var(--pill-lg);
+            box-shadow:0 4px 20px rgba(55,113,61,.02);
+        }
+        .card-box h3 {
+            margin:0 0 18px; font-size:17px; font-weight:700; color:var(--green);
+            border-bottom:2px solid var(--input); padding-bottom:8px;
+        }
+
+        /* ── INPUTS ── */
+        input, select {
+            background:var(--input); border:2px solid transparent;
+            padding:12px 18px; border-radius:var(--pill-btn);
+            width:100%; margin-bottom:12px; color:var(--text);
+            font-size:14px; font-weight:500; transition:all .2s;
+            appearance:none; -webkit-appearance:none;
+        }
+        select { padding-right:36px;
+            background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23526658' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat:no-repeat; background-position:right 14px center;
+        }
+        input:focus, select:focus { outline:none; border-color:var(--green); background-color:var(--card); }
+        body.dark input, body.dark select { color:var(--text); color-scheme:dark; }
+
+        /* ── BUTTONS ── */
+        .btn {
+            color:#fff; border:none; border-radius:var(--pill-btn);
+            padding:12px 20px; width:100%; font-weight:700; cursor:pointer;
+            margin-top:5px; transition:all .2s; font-size:13px;
+            text-transform:uppercase; letter-spacing:.3px; touch-action:manipulation;
+        }
+        .btn:hover { opacity:.9; transform:translateY(-1px); }
+        .btn:active { opacity:.75; transform:translateY(0); }
+        .btn-cancel { background:var(--muted)!important; display:none; }
+
+        .pill-btn {
+            background:var(--card); border:1px solid var(--border);
+            border-radius:var(--pill-btn); padding:8px 14px; cursor:pointer;
+            font-size:12px; font-weight:700; color:var(--text);
+            transition:all .2s; touch-action:manipulation; white-space:nowrap;
+        }
+        .pill-btn.active { background:var(--green); color:#fff; border-color:var(--green); }
+        .theme-btn {
+            border:1px solid var(--border); background:var(--card);
+            border-radius:var(--pill-btn); padding:8px 14px;
+            cursor:pointer; font-size:16px; touch-action:manipulation; transition:all .2s;
+        }
+
+        /* ── TABLE ── */
+        .tbl-wrap {
+            overflow-x:auto; margin-top:14px; background:var(--input);
+            border-radius:var(--pill-md); padding:8px;
+            -webkit-overflow-scrolling:touch;
+        }
+        table { width:100%; border-collapse:separate; border-spacing:0 6px; min-width:420px; }
+        th {
+            text-align:left; padding:8px 12px; font-size:11px; font-weight:700;
+            color:var(--muted); text-transform:uppercase; white-space:nowrap; letter-spacing:.5px;
+        }
+        td {
+            padding:11px 12px; background:var(--card);
+            border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+            font-size:13px; font-weight:500; vertical-align:middle;
+            white-space:normal; word-break:break-word;
+        }
+        td:first-child { border-left:1px solid var(--border); border-top-left-radius:12px; border-bottom-left-radius:12px; white-space:nowrap; }
+        td:last-child  { border-right:1px solid var(--border); border-top-right-radius:12px; border-bottom-right-radius:12px; }
+        td:nth-child(3) { white-space:nowrap; }
+
+        .act-btn { border:none; background:none; font-size:16px; cursor:pointer; padding:6px; transition:transform .1s; touch-action:manipulation; }
+        .act-btn:hover { transform:scale(1.2); }
+
+        /* ── PRINT ── */
+        .print-wrap { text-align:center; margin:28px 0 48px; }
+        @media print {
+            .no-print { display:none!important; }
+            body { background:#fff; color:#000; }
+            .card-box { border:none; padding:0; margin-bottom:28px; }
+        }
+
+        /* ── TABLET (768px+) ── */
+        @media(min-width:768px) {
+            body { padding:28px 24px; }
+            .header h1 { font-size:28px; }
+            .summary { grid-template-columns:repeat(4,1fr); gap:16px; }
+            .sum-card { padding:18px 14px; }
+            .sum-card h4 { font-size:13px; }
+            .sum-card p  { font-size:20px; }
+            .card-box { padding:28px; }
+            .card-box h3 { font-size:19px; }
+            .pill-btn { font-size:13px; padding:8px 16px; }
+            table { min-width:480px; }
+            th { padding:10px 14px; font-size:12px; }
+            td { padding:12px 14px; font-size:13.5px; }
+
+            #expForm  { display:grid!important; grid-template-columns:repeat(3,1fr)!important; gap:12px!important; }
+            #expForm input { margin-bottom:0; }
+            #expForm .form-actions { grid-column:span 3!important; display:flex; gap:12px; margin-top:4px; }
+
+            #dokanForm { display:grid!important; grid-template-columns:repeat(3,1fr)!important; gap:12px!important; }
+            #dokanForm input { margin-bottom:0; }
+            #dokanForm .form-actions { grid-column:span 3!important; display:flex; gap:12px; margin-top:4px; }
+        }
+
+        /* ── DESKTOP (1024px+) ── */
+        @media(min-width:1024px) {
+            body { padding:30px 32px; }
+            .header h1 { font-size:32px; }
+            .cols { grid-template-columns:repeat(2,1fr); }
+            .btn { font-size:14px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══ MAIN APP ══ -->
+<div class="main" id="mainContainer" style="display:block;">
+
+    <!-- Header -->
+    <div class="header">
+        <h1 id="mainTitle">নাহিদ কুটির 💰</h1>
+        <div class="header-btns no-print">
+            <button onclick="triggerBackup()"                                    id="backupBtn"  class="pill-btn" style="background:var(--sage);color:var(--text);">📥 ব্যাকআপ</button>
+            <button onclick="document.getElementById('restoreInput').click()"    id="restoreBtn" class="pill-btn" style="background:var(--green);color:#fff;">📤 রিস্টোর</button>
+            <input type="file" id="restoreInput" style="display:none;" accept=".json" onchange="handleRestore(event)">
+            <button onclick="toggleLang()"  id="langBtn"  class="pill-btn active">EN</button>
+            <button onclick="toggleTheme()" id="themeBtn" class="theme-btn">☀️</button>
+
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar no-print">
+        <select id="yearFilter" onchange="renderApp()" style="font-weight:bold;">
+            <option value="all" id="yearAllOpt">সব বছর</option>
+            <option value="2024">2024</option>
+            <option value="2025">2025</option>
+            <option value="2026">2026</option>
+            <option value="2027">2027</option>
+            <option value="2028">2028</option>
+        </select>
+        <select id="monthFilter" onchange="renderApp()" style="font-weight:bold;">
+            <option value="all">সব মাস</option>
+        </select>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="summary">
+        <div class="sum-card"><h4 style="color:var(--red);"  id="lbTotalExp">মোট খরচ</h4><p id="d-expense">৳ 0</p></div>
+        <div class="sum-card"><h4 style="color:var(--red);"  id="lbTotalDok">মোট দোকান বাকি</h4><p id="d-dokan">৳ 0</p></div>
+        <div class="sum-card"><h4 style="color:var(--green);" id="lbExpCount">খরচের এন্ট্রি</h4><p id="d-expcount">0</p></div>
+        <div class="sum-card"><h4 style="color:var(--muted);" id="lbDokCount">বাকির এন্ট্রি</h4><p id="d-dokcount">0</p></div>
+    </div>
+
+    <!-- Two columns: Expense + Dokan -->
+    <div class="cols">
+
+        <!-- ── EXPENSE TRACKER ── -->
+        <div class="card-box">
+            <h3 id="expenseTitle">✦ খরচ ট্র্যাকার</h3>
+            <form id="expForm" class="no-print">
+                <input type="date"   id="expDate"   required>
+                <input type="text"   id="expDesc"   placeholder="খরচের বিবরণ" required>
+                <input type="number" id="expAmount" placeholder="পরিমাণ (টাকা)" required min="0">
+                <div class="form-actions">
+                    <button type="submit" id="expSubmitBtn" class="btn" style="background:var(--green)">খরচ যোগ করুন</button>
+                    <button type="button" id="expCancelBtn" class="btn btn-cancel" onclick="resetEdit()">বাতিল</button>
+                </div>
+            </form>
+            <div class="tbl-wrap">
+                <table>
+                    <thead><tr>
+                        <th id="thExpDate">তারিখ</th>
+                        <th id="thExpDesc">বিবরণ</th>
+                        <th id="thExpAmt">টাকা</th>
+                        <th class="no-print" id="thExpAct">অ্যাকশন</th>
+                    </tr></thead>
+                    <tbody id="expBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ── SHOP DUES ── -->
+        <div class="card-box">
+            <h3 id="dokanTitle">✦ দোকান বাকি</h3>
+            <form id="dokanForm" class="no-print">
+                <input type="date"   id="dokanDate"   required>
+                <input type="text"   id="dokanDesc"   placeholder="বিবরণ" required>
+                <input type="number" id="dokanAmount" placeholder="টাকা" required min="0">
+                <div class="form-actions">
+                    <button type="submit" id="dokanSubmitBtn" class="btn" style="background:var(--red)">বাকি যোগ করুন</button>
+                    <button type="button" id="dokanCancelBtn" class="btn btn-cancel" onclick="resetEdit()">বাতিল</button>
+                </div>
+            </form>
+            <div class="tbl-wrap">
+                <table>
+                    <thead><tr>
+                        <th id="thDokDate">তারিখ</th>
+                        <th id="thDokDesc">বিবরণ</th>
+                        <th id="thDokAmt">টাকা</th>
+                        <th class="no-print" id="thDokAct">অ্যাকশন</th>
+                    </tr></thead>
+                    <tbody id="dokanBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </div><!-- /cols -->
+
+    <!-- Print Button -->
+    <div class="print-wrap no-print">
+        <button onclick="window.print()" class="btn" id="printBtn"
+            style="background:var(--green);width:auto;padding:14px 40px;border-radius:var(--pill-md);font-size:15px;">
+            📄 PDF রিপোর্ট প্রিন্ট করুন
+        </button>
+    </div>
+
+</div><!-- /main -->
+
+<script>
+    // ══ FIREBASE CONFIG ══
+    const firebaseConfig = {
+    apiKey: "AIzaSyCq3vp6EDR_tE8IT1gyrqJZwNSvfYa8QbM",
+    authDomain: "nahidkutir-expanse.firebaseapp.com",
+    projectId: "nahidkutir-expanse",
+    storageBucket: "nahidkutir-expanse.firebasestorage.app",
+    messagingSenderId: "49908192819",
+    appId: "1:49908192819:web:3314f43ad76ee8e3f87546",
+    measurementId: "G-JZ7WSDMQ6Z"
+  };
+
+    firebase.initializeApp(firebaseConfig);
+    const db   = firebase.firestore();
+
+    try {
+        db.settings({
+            cache: {
+                kind: 'persistent',
+                tabManager: firebase.firestore.PersistentMultipleTabManager()
+            }
+        });
+    } catch(e) { console.warn('Firestore cache:', e.message); }
+
+    // ══ No login required — app starts directly ══
+    document.getElementById('mainContainer').style.display = 'block';
+    initApp();
+
+    // ══ TRANSLATIONS ══
+    const TR = {
+        bn: {
+            mainTitle:       'নাহিদ কুটির 💰',
+            yearAllOpt:      'সব বছর',
+            lbTotalExp:      'মোট খরচ',
+            lbTotalDok:      'মোট দোকান বাকি',
+            lbExpCount:      'খরচের এন্ট্রি',
+            lbDokCount:      'বাকির এন্ট্রি',
+            expenseTitle:    '✦ খরচ ট্র্যাকার',
+            dokanTitle:      '✦ দোকান বাকি',
+            expDescPh:       'খরচের বিবরণ',
+            expAmtPh:        'পরিমাণ (টাকা)',
+            expSubmit:       'খরচ যোগ করুন',
+            expUpdate:       'খরচ আপডেট করুন ⚙️',
+            dokanDescPh:     'বিবরণ',
+            dokanAmtPh:      'টাকা',
+            dokanSubmit:     'বাকি যোগ করুন',
+            dokanUpdate:     'বাকি আপডেট করুন ⚙️',
+            thExpDate:       'তারিখ',
+            thExpDesc:       'বিবরণ',
+            thExpAmt:        'টাকা',
+            thExpAct:        'অ্যাকশন',
+            thDokDate:       'তারিখ',
+            thDokDesc:       'বিবরণ',
+            thDokAmt:        'টাকা',
+            thDokAct:        'অ্যাকশন',
+            printBtn:        '📄 PDF রিপোর্ট প্রিন্ট করুন',
+            cancelBtn:       'বাতিল',
+            backupBtn:       '📥 ব্যাকআপ',
+            restoreBtn:      '📤 রিস্টোর',
+            totalRow:        'সর্বমোট',
+            deleteConfirm:   'এটি ডিলিট করতে নিশ্চিত?',
+            currency:        '৳ ',
+            months: ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর']
+        },
+        en: {
+            mainTitle:       'Nahid Kutir 💰',
+            yearAllOpt:      'All Years',
+            lbTotalExp:      'Total Expense',
+            lbTotalDok:      'Total Shop Dues',
+            lbExpCount:      'Expense Entries',
+            lbDokCount:      'Due Entries',
+            expenseTitle:    '✦ Expense Tracker',
+            dokanTitle:      '✦ Shop Dues',
+            expDescPh:       'Description',
+            expAmtPh:        'Amount',
+            expSubmit:       'Log Expense',
+            expUpdate:       'Update Expense ⚙️',
+            dokanDescPh:     'Description',
+            dokanAmtPh:      'Amount',
+            dokanSubmit:     'Add Shop Due',
+            dokanUpdate:     'Update Shop Due ⚙️',
+            thExpDate:       'Date',
+            thExpDesc:       'Description',
+            thExpAmt:        'Amount',
+            thExpAct:        'Action',
+            thDokDate:       'Date',
+            thDokDesc:       'Description',
+            thDokAmt:        'Amount',
+            thDokAct:        'Action',
+            printBtn:        '📄 Print PDF Report',
+            cancelBtn:       'Cancel',
+            backupBtn:       '📥 Backup',
+            restoreBtn:      '📤 Restore',
+            totalRow:        'Grand Total',
+            deleteConfirm:   'Delete this item?',
+            currency:        '৳ ',
+            months: ['January','February','March','April','May','June','July','August','September','October','November','December']
+        }
+    };
+
+    let lang     = localStorage.getItem('nk_lang') || 'bn';
+    let expData  = [];
+    let dokData  = [];
+    let editExpId = null;
+    let editDokId = null;
+
+    const t = k => TR[lang][k] || TR.bn[k];
+    const fc = amt => t('currency') + Number(amt).toLocaleString();
+    function esc(s) {
+        if (!s && s !== 0) return '';
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+    }
+
+    // ══ LANGUAGE ══
+    function toggleLang() {
+        lang = lang === 'bn' ? 'en' : 'bn';
+        localStorage.setItem('nk_lang', lang);
+        document.documentElement.lang = lang;
+        updateText();
+    }
+
+    function updateText() {
+        document.getElementById('mainTitle').textContent   = t('mainTitle');
+        document.getElementById('yearAllOpt').textContent  = t('yearAllOpt');
+        document.getElementById('lbTotalExp').textContent  = t('lbTotalExp');
+        document.getElementById('lbTotalDok').textContent  = t('lbTotalDok');
+        document.getElementById('lbExpCount').textContent  = t('lbExpCount');
+        document.getElementById('lbDokCount').textContent  = t('lbDokCount');
+        document.getElementById('expenseTitle').textContent = t('expenseTitle');
+        document.getElementById('dokanTitle').textContent  = t('dokanTitle');
+        document.getElementById('expDesc').placeholder     = t('expDescPh');
+        document.getElementById('expAmount').placeholder   = t('expAmtPh');
+        document.getElementById('expSubmitBtn').textContent = editExpId ? t('expUpdate') : t('expSubmit');
+        document.getElementById('dokanDesc').placeholder   = t('dokanDescPh');
+        document.getElementById('dokanAmount').placeholder = t('dokanAmtPh');
+        document.getElementById('dokanSubmitBtn').textContent = editDokId ? t('dokanUpdate') : t('dokanSubmit');
+        document.getElementById('thExpDate').textContent   = t('thExpDate');
+        document.getElementById('thExpDesc').textContent   = t('thExpDesc');
+        document.getElementById('thExpAmt').textContent    = t('thExpAmt');
+        document.getElementById('thExpAct').textContent    = t('thExpAct');
+        document.getElementById('thDokDate').textContent   = t('thDokDate');
+        document.getElementById('thDokDesc').textContent   = t('thDokDesc');
+        document.getElementById('thDokAmt').textContent    = t('thDokAmt');
+        document.getElementById('thDokAct').textContent    = t('thDokAct');
+        document.getElementById('printBtn').textContent    = t('printBtn');
+        document.getElementById('backupBtn').textContent   = t('backupBtn');
+        document.getElementById('restoreBtn').textContent  = t('restoreBtn');
+        document.getElementById('langBtn').textContent     = lang === 'bn' ? 'EN' : 'বাং';
+        document.querySelectorAll('.btn-cancel').forEach(b => b.textContent = t('cancelBtn'));
+        populateMonths();
+        renderApp();
+    }
+
+    // ══ THEME ══
+    function toggleTheme() {
+        document.body.classList.toggle('dark');
+        document.getElementById('themeBtn').textContent = document.body.classList.contains('dark') ? '🌙' : '☀️';
+    }
+
+    // ══ FILTERS ══
+    function populateMonths() {
+        const sel = document.getElementById('monthFilter');
+        const cur = sel.value || 'all';
+        sel.innerHTML = `<option value="all">${lang === 'bn' ? 'সব মাস' : 'All Months'}</option>`;
+        t('months').forEach((m, i) => {
+            sel.innerHTML += `<option value="${String(i+1).padStart(2,'0')}">${m}</option>`;
+        });
+        sel.value = cur;
+    }
+
+    // ══ INIT ══
+    let appStarted = false;
+    function initApp() {
+        if (appStarted) return;
+        appStarted = true;
+
+        // Set current year
+        const yr = new Date().getFullYear().toString();
+        document.getElementById('yearFilter').value = yr;
+        populateMonths();
+        setDates();
+
+        // Firestore listeners
+        db.collection('expenses').onSnapshot(snap => {
+            expData = []; snap.forEach(d => expData.push({id: d.id, ...d.data()}));
+            renderApp();
+        }, console.error);
+
+        db.collection('dokanBaki').onSnapshot(snap => {
+            dokData = []; snap.forEach(d => dokData.push({id: d.id, ...d.data()}));
+            renderApp();
+        }, console.error);
+
+        updateText();
+    }
+
+    function setDates() {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('expDate').value   = today;
+        document.getElementById('dokanDate').value = today;
+    }
+
+    // ══ FORM SUBMIT — EXPENSE ══
+    document.getElementById('expForm').onsubmit = e => {
+        e.preventDefault();
+        const obj = {
+            date:   document.getElementById('expDate').value,
+            desc:   document.getElementById('expDesc').value.trim(),
+            amount: +document.getElementById('expAmount').value
+        };
+        const col = db.collection('expenses');
+        (editExpId ? col.doc(editExpId).update(obj) : col.add(obj))
+            .catch(err => alert('Error: ' + err.message));
+        resetEdit();
+    };
+
+    // ══ FORM SUBMIT — DOKAN ══
+    document.getElementById('dokanForm').onsubmit = e => {
+        e.preventDefault();
+        const obj = {
+            date:   document.getElementById('dokanDate').value,
+            desc:   document.getElementById('dokanDesc').value.trim(),
+            amount: +document.getElementById('dokanAmount').value
+        };
+        const col = db.collection('dokanBaki');
+        (editDokId ? col.doc(editDokId).update(obj) : col.add(obj))
+            .catch(err => alert('Error: ' + err.message));
+        resetEdit();
+    };
+
+    // ══ EDIT ══
+    function startEdit(type, id) {
+        if (type === 'exp') {
+            const r = expData.find(x => x.id === id); if (!r) return;
+            editExpId = id;
+            document.getElementById('expDate').value   = r.date;
+            document.getElementById('expDesc').value   = r.desc;
+            document.getElementById('expAmount').value = r.amount;
+            document.getElementById('expSubmitBtn').textContent = t('expUpdate');
+            document.getElementById('expSubmitBtn').style.background = 'var(--sage)';
+            document.getElementById('expCancelBtn').style.display = 'inline-block';
+            document.getElementById('expDesc').focus();
+        } else {
+            const r = dokData.find(x => x.id === id); if (!r) return;
+            editDokId = id;
+            document.getElementById('dokanDate').value   = r.date;
+            document.getElementById('dokanDesc').value   = r.desc;
+            document.getElementById('dokanAmount').value = r.amount;
+            document.getElementById('dokanSubmitBtn').textContent = t('dokanUpdate');
+            document.getElementById('dokanSubmitBtn').style.background = 'var(--sage)';
+            document.getElementById('dokanCancelBtn').style.display = 'inline-block';
+            document.getElementById('dokanDesc').focus();
+        }
+        // Scroll to the relevant form
+        const formId = type === 'exp' ? 'expForm' : 'dokanForm';
+        document.getElementById(formId).scrollIntoView({behavior:'smooth', block:'nearest'});
+    }
+
+    function del(type, id) {
+        if (!confirm(t('deleteConfirm'))) return;
+        if (type === 'exp') db.collection('expenses').doc(id).delete();
+        else                db.collection('dokanBaki').doc(id).delete();
+    }
+
+    function resetEdit() {
+        editExpId = null; editDokId = null;
+        document.getElementById('expForm').reset();
+        document.getElementById('dokanForm').reset();
+        setDates();
+
+        document.getElementById('expSubmitBtn').textContent = t('expSubmit');
+        document.getElementById('expSubmitBtn').style.background = 'var(--green)';
+        document.getElementById('expCancelBtn').style.display = 'none';
+
+        document.getElementById('dokanSubmitBtn').textContent = t('dokanSubmit');
+        document.getElementById('dokanSubmitBtn').style.background = 'var(--red)';
+        document.getElementById('dokanCancelBtn').style.display = 'none';
+    }
+
+    // ══ RENDER ══
+    function renderApp() {
+        if (document.getElementById('mainContainer').style.display === 'none') return;
+
+        const yr = document.getElementById('yearFilter').value;
+        const mo = document.getElementById('monthFilter').value;
+
+        function inRange(date) {
+            if (!date) return false;
+            const p = date.split('-');
+            return (yr === 'all' || p[0] === yr) && (mo === 'all' || p[1] === mo);
+        }
+
+        // — Expenses —
+        const expBody = document.getElementById('expBody');
+        expBody.innerHTML = '';
+        let totalExp = 0;
+        const filteredExp = expData.filter(x => inRange(x.date)).sort((a,b) => b.date.localeCompare(a.date));
+        filteredExp.forEach(ex => {
+            totalExp += (ex.amount || 0);
+            expBody.innerHTML += `<tr>
+                <td>${esc(ex.date)}</td>
+                <td>${esc(ex.desc)}</td>
+                <td style="color:var(--red);font-weight:bold;">-${fc(ex.amount)}</td>
+                <td class="no-print">
+                    <button onclick="startEdit('exp','${ex.id}')" class="act-btn" style="color:var(--green)">✎</button>
+                    <button onclick="del('exp','${ex.id}')"       class="act-btn" style="color:var(--red)">✕</button>
+                </td>
+            </tr>`;
+        });
+        if (filteredExp.length > 0) {
+            expBody.innerHTML += `<tr style="font-weight:bold;background:var(--input)">
+                <td>${esc(t('totalRow'))}</td><td>—</td>
+                <td style="color:var(--red);">-${fc(totalExp)}</td>
+                <td class="no-print"></td>
+            </tr>`;
+        }
+
+        // — Dokan —
+        const dokBody = document.getElementById('dokanBody');
+        dokBody.innerHTML = '';
+        let totalDok = 0;
+        const filteredDok = dokData.filter(x => inRange(x.date)).sort((a,b) => b.date.localeCompare(a.date));
+        filteredDok.forEach(dk => {
+            totalDok += (dk.amount || 0);
+            dokBody.innerHTML += `<tr>
+                <td>${esc(dk.date)}</td>
+                <td>${esc(dk.desc)}</td>
+                <td style="color:var(--red);font-weight:bold;">${fc(dk.amount)}</td>
+                <td class="no-print">
+                    <button onclick="startEdit('dok','${dk.id}')" class="act-btn" style="color:var(--green)">✎</button>
+                    <button onclick="del('dok','${dk.id}')"       class="act-btn" style="color:var(--red)">✕</button>
+                </td>
+            </tr>`;
+        });
+        if (filteredDok.length > 0) {
+            dokBody.innerHTML += `<tr style="font-weight:bold;background:var(--input)">
+                <td>${esc(t('totalRow'))}</td><td>—</td>
+                <td style="color:var(--red);">${fc(totalDok)}</td>
+                <td class="no-print"></td>
+            </tr>`;
+        }
+
+        // — Summary cards —
+        document.getElementById('d-expense').textContent  = fc(totalExp);
+        document.getElementById('d-dokan').textContent    = fc(totalDok);
+        document.getElementById('d-expcount').textContent = filteredExp.length;
+        document.getElementById('d-dokcount').textContent = filteredDok.length;
+    }
+
+    // ══ BACKUP ══
+    async function triggerBackup() {
+        try {
+            const [expSnap, dokSnap] = await Promise.all([
+                db.collection('expenses').get(),
+                db.collection('dokanBaki').get()
+            ]);
+            const data = { expenses:[], dokanBaki:[] };
+            expSnap.forEach(d => data.expenses.push(d.data()));
+            dokSnap.forEach(d => data.dokanBaki.push(d.data()));
+
+            const a = document.createElement('a');
+            a.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data, null, 2));
+            a.download = `NahidKutir_ExpDokan_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a); a.click(); a.remove();
+        } catch(err) { alert('ব্যাকআপ ব্যর্থ: ' + err.message); }
+    }
+
+    // ══ RESTORE ══
+    function handleRestore(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (!confirm('ডাটা রিস্টোর করবেন? ডুপ্লিকেট এড়িয়ে মার্জ হবে।')) return;
+
+                let batch = db.batch();
+                let ops = 0;
+                const flush = async () => { if (ops >= 400) { await batch.commit(); batch = db.batch(); ops = 0; } };
+
+                if (Array.isArray(data.expenses)) {
+                    for (const item of data.expenses) {
+                        if (!expData.some(x => x.date === item.date && x.desc?.trim() === item.desc?.trim() && x.amount === item.amount)) {
+                            batch.set(db.collection('expenses').doc(), item); ops++; await flush();
+                        }
+                    }
+                }
+                if (Array.isArray(data.dokanBaki)) {
+                    for (const item of data.dokanBaki) {
+                        if (!dokData.some(x => x.date === item.date && x.desc?.trim() === item.desc?.trim() && x.amount === item.amount)) {
+                            batch.set(db.collection('dokanBaki').doc(), item); ops++; await flush();
+                        }
+                    }
+                }
+                if (ops > 0) await batch.commit();
+                alert('রিস্টোর সফল! ডুপ্লিকেট এড়ানো হয়েছে।');
+                resetEdit();
+            } catch(err) { alert('ফাইল সঠিক নয়: ' + err.message); }
+        };
+        reader.readAsText(file);
+        event.target.value = '';
+    }
+</script>
 </body>
 </html>
