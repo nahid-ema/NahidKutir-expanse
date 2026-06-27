@@ -708,9 +708,6 @@
             try {
                 firebase.initializeApp(firebaseConfig);
                 db = firebase.firestore();
-                
-                db.enablePersistence()
-                    .catch(err => console.warn('Persistence warning:', err.message));
 
                 db.collection('expenses').onSnapshot(snap => {
                     expData = []; snap.forEach(d => expData.push({id: d.id, ...d.data()}));
