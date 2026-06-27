@@ -709,7 +709,7 @@
                 firebase.initializeApp(firebaseConfig);
                 db = firebase.firestore();
                 
-                db.enablePersistence({ synchronizeTabs: true })
+                db.enablePersistence()
                     .catch(err => console.warn('Persistence warning:', err.message));
 
                 db.collection('expenses').onSnapshot(snap => {
